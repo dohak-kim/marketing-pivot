@@ -2,5 +2,10 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "rewrites": [
+    { "source": "/api/serper/search",  "destination": "/api/serper/search" },
+    { "source": "/api/naver/(.*)",     "destination": "/api/naver/$1" },
+    { "source": "/api/naver-ad/(.*)",  "destination": "/api/naver-ad/$1" }
+  ]
 }
