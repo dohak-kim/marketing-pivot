@@ -16,7 +16,6 @@ interface AnalysisLayoutProps {
 export const AnalysisLayout: React.FC<AnalysisLayoutProps> = ({ result, keyword, onGenerateReport }) => {
   const [report, setReport] = useState<MarketingReport | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
 
   const categorizedSources = useMemo((): CategorizedSources => {
@@ -53,8 +52,18 @@ export const AnalysisLayout: React.FC<AnalysisLayoutProps> = ({ result, keyword,
         {`
           @media print {
             .no-print { display: none !important; }
-            section { page-break-inside: avoid; break-inside: avoid; margin-bottom: 2rem; }
-            .page-break { page-break-before: always; break-before: page; }
+            section { page-break-inside: avoid; break-inside: avoid; }
+
+            /* space-y-24(6rem) → 1.5rem으로 줄임 */
+            .space-y-24 > :not([hidden]) ~ :not([hidden]) {
+              margin-top: 1.5rem !important;
+            }
+            /* 불필요한 하단 여백 제거 */
+            .pb-48 { padding-bottom: 1rem !important; }
+
+            /* 인쇄 여백 설정 */
+            @page { margin: 1.5cm; }
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
           }
           .pdf-section { break-inside: avoid; page-break-inside: avoid; }
         `}

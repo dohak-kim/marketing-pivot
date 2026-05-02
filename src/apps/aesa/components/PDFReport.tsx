@@ -13,7 +13,7 @@ import { AnalysisResult, MarketingReport } from '../types';
 // ─── 폰트 등록 — Pretendard (jsDelivr CDN, 버전 고정, TTF) ───────
 // Google Fonts v27 URL은 deprecated → Pretendard로 교체
 // https://github.com/orioncactus/pretendard
-const FONT_BASE = 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/static/alternative/TrueType';
+const FONT_BASE = 'https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/alternative/TrueType';
 
 Font.register({
   family: 'NotoSansKR',
