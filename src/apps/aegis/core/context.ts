@@ -28,6 +28,11 @@ export interface OwnedMediaPlan {
   geoStrategy: string[];   // GEO: Generative Engine Optimization (AI 검색)
 }
 
+export interface VeoPromptPair {
+  reels15s: string;   // 15초 숏폼 (Reels/Shorts) 영문 Veo 프롬프트
+  shorts30s: string;  // 30초 YouTube Shorts 영문 Veo 프롬프트
+}
+
 export interface ExecutionPlan {
   situationSummary: string;
   executionPriority: "High" | "Medium" | "Low";
@@ -36,6 +41,7 @@ export interface ExecutionPlan {
   earnedMedia: string[];
   paidMedia: string[];
   kpiFramework: string[];
+  veoPrompts?: VeoPromptPair;
 }
 
 export enum ConversionStage {

@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { ExecutionPlan, OwnedMediaPlan } from '../core/context';
+import { ExecutionPlan, OwnedMediaPlan, VeoPromptPair } from '../core/context';
 
 // ── 구형 plan 마이그레이션 ───────────────────────────────────────────────────
 function migrateLegacyPlan(plan: any): ExecutionPlan {
@@ -167,6 +167,79 @@ const MediaSection: React.FC<MediaSectionProps> = ({ tier, defaultOpen = true, c
           {children}
         </div>
       )}
+    </div>
+  );
+};
+
+// ── FORGE Veo 크리에이티브 섹션 ────────────────────────────────────────────────
+
+interface ForgeVeoSectionProps { prompts: VeoPromptPair; }
+
+const ForgeVeoSection: React.FC<ForgeVeoSectionProps> = ({ prompts }) => {
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const copy = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2000);
+  };
+
+  const cards = [
+    {
+      key: 'reels15s',
+      label: 'REELS 15S',
+      badge: '숏폼 · 9:16',
+      desc: '강한 첫 3초 훅',
+      text: prompts.reels15s,
+      gradient: 'from-orange-500 to-rose-500',
+    },
+    {
+      key: 'shorts30s',
+      label: 'SHORTS 30S',
+      badge: '스토리텔링 · 9:16',
+      desc: '문제 → 해결 → CTA',
+      text: prompts.shorts30s,
+      gradient: 'from-violet-500 to-indigo-500',
+    },
+  ];
+
+  return (
+    <div className="rounded-2xl border border-orange-200 dark:border-orange-500/20 overflow-hidden">
+      <div className="bg-gradient-to-r from-orange-50 to-rose-50 dark:from-orange-900/20 dark:to-rose-900/20 px-4 py-3 flex items-center gap-2">
+        <span className="w-2 h-2 rounded-full bg-orange-500" />
+        <span className="text-[10px] font-black uppercase tracking-widest text-orange-700 dark:text-orange-300">
+          FORGE · Veo 크리에이티브
+        </span>
+        <span className="ml-auto text-[7px] font-black px-1.5 py-0.5 rounded-full bg-white/60 dark:bg-white/10 text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+          Veo 3.1
+        </span>
+      </div>
+      <div className="p-4 bg-white dark:bg-white/[0.02] space-y-3">
+        {cards.filter(c => c.text).map(card => (
+          <div key={card.key} className="rounded-xl border border-slate-100 dark:border-white/5 overflow-hidden">
+            <div className="flex items-center justify-between gap-2 bg-slate-50 dark:bg-slate-800/40 px-3 py-2 border-b border-slate-100 dark:border-white/5">
+              <div className="flex items-center gap-1.5">
+                <span className={`text-[7px] font-black px-1.5 py-0.5 rounded bg-gradient-to-r ${card.gradient} text-white`}>
+                  {card.label}
+                </span>
+                <span className="text-[8px] text-slate-500 dark:text-slate-400">{card.badge}</span>
+                <span className="text-[7px] text-slate-400 dark:text-slate-500">/ {card.desc}</span>
+              </div>
+              <button
+                onClick={() => copy(card.text, card.key)}
+                className="text-[9px] font-bold px-2 py-0.5 rounded-lg border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+              >
+                {copiedKey === card.key ? '✓ Copied' : 'Copy'}
+              </button>
+            </div>
+            <div className="p-3">
+              <p className="text-[10px] font-mono text-slate-600 dark:text-slate-300 leading-relaxed break-words">
+                {card.text}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
@@ -346,6 +419,11 @@ const StrategicBrief: React.FC<StrategicBriefProps> = ({ plan: rawPlan, isLoadin
             ))}
           </div>
         </div>
+      )}
+
+      {/* ── 7. AEGIS FORGE — Veo 크리에이티브 프롬프트 ── */}
+      {plan.veoPrompts && (plan.veoPrompts.reels15s || plan.veoPrompts.shorts30s) && (
+        <ForgeVeoSection prompts={plan.veoPrompts} />
       )}
     </div>
   );

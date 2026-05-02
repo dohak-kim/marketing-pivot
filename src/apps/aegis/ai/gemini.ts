@@ -330,7 +330,11 @@ export async function generateExecutionPlan(cep: Context, brandName: string): Pr
 
 6. 리소스 강도: light / moderate / aggressive
 
-모든 텍스트는 한국어로 작성하고 각 항목은 구체적 액션 중심으로 작성하세요.
+7. FORGE 크리에이티브 — Veo 영상 프롬프트 (반드시 영어로 작성):
+   - reels15s: 15초 숏폼 영상(Reels/Shorts)용 Veo 3.1 프롬프트. 이 CEP의 상황(${cep.situation})과 카테고리(${cep.category})를 시각적으로 표현하는 구체적 씬 묘사. "Cinematic 4k shot of..."로 시작. 9:16 포맷, 강한 첫 3초 훅 포함.
+   - shorts30s: 30초 스토리텔링형 YouTube Shorts용 Veo 3.1 프롬프트. 문제 → 해결 → CTA 3단 구조. "Cinematic 4k sequence..."로 시작.
+
+모든 텍스트는 한국어로 작성하고 각 항목은 구체적 액션 중심으로 작성하세요. (단, veoPrompts 항목은 반드시 영어로 작성할 것)
 `;
 
         const ownedMediaSchema = {
@@ -362,7 +366,15 @@ export async function generateExecutionPlan(cep: Context, brandName: string): Pr
                         paidMedia:    { type: Type.ARRAY, items: { type: Type.STRING } },
                         kpiFramework: { type: Type.ARRAY, items: { type: Type.STRING } },
                     },
-                    required: ["situationSummary", "executionPriority", "resourceIntensity", "ownedMedia", "earnedMedia", "paidMedia", "kpiFramework"]
+                    veoPrompts: {
+                        type: Type.OBJECT,
+                        properties: {
+                            reels15s:  { type: Type.STRING },
+                            shorts30s: { type: Type.STRING },
+                        },
+                        required: ["reels15s", "shorts30s"],
+                    },
+                    required: ["situationSummary", "executionPriority", "resourceIntensity", "ownedMedia", "earnedMedia", "paidMedia", "kpiFramework", "veoPrompts"]
                 }
             }
         });
