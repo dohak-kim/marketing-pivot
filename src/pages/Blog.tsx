@@ -75,7 +75,7 @@ export default function Blog() {
         name: 'Marketing Pivot 인사이트',
         url: 'https://marketing-pivot.vercel.app/blog',
         description: 'AI 검색 최적화(AEO·GEO)와 마케팅 전략 실증 데이터 기반 인사이트',
-        author: { '@type': 'Person', name: '김도학', jobTitle: 'CSO · 경영학 박사' },
+        author: { '@type': 'Person', name: '김도학', jobTitle: 'CEO · 경영학 박사' },
       })}} />
 
       <div className="max-w-5xl mx-auto px-6 pt-16 pb-20">

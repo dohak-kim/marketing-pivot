@@ -9,6 +9,17 @@ export interface BlogFaq {
   a: string;
 }
 
+export interface HowToStep {
+  name: string;
+  text: string;
+}
+
+export interface BlogQuote {
+  text: string;
+  author?: string;
+  sourceUrl?: string;
+}
+
 export interface BlogPost {
   slug: string;
   title: string;
@@ -23,5 +34,7 @@ export interface BlogPost {
   excerpt: string;
   content: string;
   faqs: BlogFaq[];
+  howToSteps?: HowToStep[];
+  quotes?: BlogQuote[];
   published: boolean;
 }

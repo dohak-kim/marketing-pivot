@@ -1,8 +1,7 @@
 import React from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
 import { posts } from '@/data/posts';
-import { generateArticleSchema, generateFaqSchema, generateBreadcrumbSchema } from '@/lib/blogSchema';
+import { generateAllSchemas } from '@/lib/blogSchema';
 
 const CATEGORY_COLOR: Record<string, string> = {
   'AEO 인사이트':    'text-indigo-400',
@@ -11,6 +10,30 @@ const CATEGORY_COLOR: Record<string, string> = {
   'GEO 전략':        'text-teal-400',
   '마케팅 인사이트':  'text-rose-400',
 };
+
+const BLOG_CONTENT_STYLE = `
+  .blog-content h2 { font-size: 1.15rem; font-weight: 900; color: #f1f5f9; margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .blog-content h3 { font-size: 1rem; font-weight: 800; color: #a5b4fc; margin: 1.75rem 0 0.75rem; }
+  .blog-content h4 { font-size: 0.9rem; font-weight: 700; color: #e2e8f0; margin: 1.25rem 0 0.5rem; }
+  .blog-content p  { font-size: 0.875rem; color: #cbd5e1; line-height: 1.85; margin-bottom: 1rem; word-break: keep-all; }
+  .blog-content strong { color: #f1f5f9; font-weight: 700; }
+  .blog-content em { font-style: italic; }
+  .blog-content u  { text-decoration: underline; }
+  .blog-content blockquote { border-left: 4px solid #6366f1; background: rgba(99,102,241,0.06); padding: 1rem 1.25rem; margin: 1.5rem 0; border-radius: 0 0.75rem 0.75rem 0; color: #cbd5e1; font-size: 0.875rem; }
+  .blog-content ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 1rem; }
+  .blog-content ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1rem; }
+  .blog-content li { font-size: 0.875rem; color: #cbd5e1; line-height: 1.75; margin-bottom: 0.35rem; }
+  .blog-content a  { color: #818cf8; text-decoration: underline; text-underline-offset: 2px; }
+  .blog-content a:hover { color: #a5b4fc; }
+  .blog-content code { background: #1e293b; color: #a5b4fc; padding: 0.15rem 0.45rem; border-radius: 0.3rem; font-size: 0.78rem; font-family: monospace; }
+  .blog-content pre { background: #1e293b; border: 1px solid rgba(255,255,255,0.05); border-radius: 0.75rem; padding: 1rem; overflow-x: auto; margin: 1rem 0; }
+  .blog-content pre code { background: none; color: #94a3b8; font-size: 0.78rem; }
+  .blog-content table { border-collapse: collapse; width: 100%; margin: 1.25rem 0; font-size: 0.8rem; }
+  .blog-content th { background: rgba(255,255,255,0.04); padding: 0.6rem 0.9rem; text-align: left; font-weight: 700; color: #94a3b8; border: 1px solid rgba(255,255,255,0.08); }
+  .blog-content td { padding: 0.6rem 0.9rem; color: #94a3b8; border: 1px solid rgba(255,255,255,0.05); }
+  .blog-content hr { border-color: rgba(255,255,255,0.08); margin: 2rem 0; }
+  .blog-content img { max-width: 100%; border-radius: 0.75rem; margin: 1rem 0; }
+`;
 
 const md: Record<string, React.FC<any>> = {
   h2: ({ children }) => (
@@ -67,16 +90,13 @@ export default function BlogPost() {
 
   if (!post) return <Navigate to="/blog" replace />;
 
-  const schemas = [
-    generateArticleSchema(post),
-    generateFaqSchema(post.faqs),
-    generateBreadcrumbSchema(post),
-  ].filter(Boolean);
+  const schemas = generateAllSchemas(post);
 
   const catColor = CATEGORY_COLOR[post.category] ?? 'text-slate-400';
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
+      <style>{BLOG_CONTENT_STYLE}</style>
       {schemas.map((s, i) => (
         <script key={i} type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
@@ -137,9 +157,7 @@ export default function BlogPost() {
         </header>
 
         {/* 본문 */}
-        <div>
-          <ReactMarkdown components={md}>{post.content}</ReactMarkdown>
-        </div>
+        <div className="blog-content" dangerouslySetInnerHTML={{ __html: post.content }} />
 
         {/* FAQ */}
         {post.faqs.length > 0 && (
