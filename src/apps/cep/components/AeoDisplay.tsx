@@ -1,14 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import type { 
-  AeoContent, 
-  BlogAeoContent, 
-  LinkedInAeoContent, 
-  ImageStyleConfig, 
-  ImageType, 
-  ImageTone, 
-  ImageColor 
+import { useNavigate } from 'react-router-dom';
+import type {
+  AeoContent,
+  BlogAeoContent,
+  LinkedInAeoContent,
+  ImageStyleConfig,
+  ImageType,
+  ImageTone,
+  ImageColor
 } from '../types';
 import { generateSectionImage } from '../services/geminiService';
+
+function blogContentToHtml(blog: BlogAeoContent): string {
+  const intro = blog.introduction
+    ? `<p>${blog.introduction.replace(/\n/g, '</p><p>')}</p>` : '';
+  const sections = blog.sections.map(s => {
+    const img = s.imageUrl
+      ? `<img src="${s.imageUrl}" alt="${s.heading}" />` : '';
+    const body = s.body
+      ? `<p>${s.body.replace(/\n/g, '</p><p>')}</p>` : '';
+    return `<h2>${s.heading}</h2>${img}${body}`;
+  }).join('');
+  const conclusion = blog.conclusion
+    ? `<h2>결론</h2><p>${blog.conclusion.replace(/\n/g, '</p><p>')}</p>` : '';
+  return `${intro}${sections}${conclusion}`;
+}
 
 interface AeoDisplayProps {
   content: AeoContent;
@@ -23,6 +39,19 @@ const AeoDisplay: React.FC<AeoDisplayProps> = ({ content, onRewrite, isRewriting
   const [editableContent, setEditableContent] = useState(content);
   const [copyStatus, setCopyStatus] = useState('Copy');
   const [isPrintDarkMode, setIsPrintDarkMode] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSendToBlog = () => {
+    if (editableContent.format !== 'blog') return;
+    const blog = editableContent as BlogAeoContent;
+    sessionStorage.setItem('signal_to_blog', JSON.stringify({
+      title: blog.title,
+      content: blogContentToHtml(blog),
+      tags: query ? [query] : [],
+      excerpt: blog.introduction?.slice(0, 160) ?? '',
+    }));
+    navigate('/admin/blog');
+  };
   const [imageConfig, setImageConfig] = useState<ImageStyleConfig>({
     type: 'Illustration',
     tone: 'Professional',
@@ -340,7 +369,16 @@ ${linkedinContent.hashtags}
                     </button>
                 </div>
                 
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
+                    {editableContent.format === 'blog' && (
+                      <button
+                          onClick={handleSendToBlog}
+                          className="flex items-center gap-1.5 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl transition-all shadow-lg active:scale-95"
+                      >
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                          Blog Editor에서 편집
+                      </button>
+                    )}
                     <button
                         onClick={handlePrintSection}
                         className="flex items-center gap-2 px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-black text-xs rounded-xl transition-all shadow-lg active:scale-95"
@@ -355,7 +393,7 @@ ${linkedinContent.hashtags}
                     >
                          {isRewriting ? '재구성 중...' : 'AI 재작성'}
                     </button>
-                    <button 
+                    <button
                         onClick={handleCopyToClipboard}
                         className={`px-5 py-2.5 ${isLightMode ? 'bg-slate-200 text-slate-700' : 'bg-slate-700 text-slate-200'} font-black text-xs rounded-xl hover:bg-slate-600 hover:text-white transition-all`}
                     >

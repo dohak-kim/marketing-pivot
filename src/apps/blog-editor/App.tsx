@@ -534,6 +534,28 @@ export default function BlogEditorApp() {
 
   const handleAuth = () => { sessionStorage.setItem('blog-admin', '1'); setAuthed(true); };
 
+  // Signal → Blog Editor 주입
+  useEffect(() => {
+    if (!authed || !editor) return;
+    const raw = sessionStorage.getItem('signal_to_blog');
+    if (!raw) return;
+    try {
+      const data = JSON.parse(raw) as { title: string; content: string; tags: string[]; excerpt: string };
+      setPost(prev => ({
+        ...prev,
+        title: data.title || prev.title,
+        slug: data.title ? toSlug(data.title) : prev.slug,
+        excerpt: data.excerpt || prev.excerpt,
+        tags: data.tags?.length ? data.tags : prev.tags,
+        content: data.content || prev.content,
+        readingTime: calcReadTime(data.content || ''),
+      }));
+      setTagsRaw((data.tags ?? []).join(', '));
+      editor.commands.setContent(data.content || '');
+    } catch {}
+    sessionStorage.removeItem('signal_to_blog');
+  }, [authed, editor]);
+
   const set = useCallback(<K extends keyof BlogPost>(key: K, val: BlogPost[K]) => {
     setPost(prev => {
       const next = { ...prev, [key]: val };
