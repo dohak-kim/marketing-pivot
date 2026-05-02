@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import AppHeader from '@/shared/components/AppHeader';
 import type { AnalysisResultItem, Cluster, ClusterResult, AeoContent, AeoScoreReport, KeywordIntelligence, FullAnalysisResult } from './types';
 import InputForm from './components/InputForm';
 import ResultsDisplay from './components/ResultsDisplay';
@@ -155,20 +156,14 @@ const CepApp: React.FC = () => {
         </div>
       )}
 
-      {/* 앱 헤더 */}
-      <div className="border-b border-white/5 px-6 py-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-black tracking-tight">
-            AEGIS <span className="text-violet-400">Signal</span>
-          </h1>
-          <p className="text-xs text-slate-400 mt-0.5">CEP 트렌드 · 타겟 페르소나 · AEO 콘텐츠 분석</p>
-        </div>
-        {(analysisResult || batchResults) && (
-          <button onClick={handlePrint} className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 transition-colors print:hidden">
-            PDF 출력
-          </button>
-        )}
-      </div>
+      <AppHeader
+        icon="📊" name="AEGIS Signal" accentPart="Signal"
+        subtitle="CEP 트렌드 · 타겟 페르소나 · AEO 콘텐츠 분석"
+        accentColor="text-violet-400" iconBg="bg-violet-600" theme="dark"
+        actions={(analysisResult || batchResults) ? (
+          <button onClick={handlePrint} className="print:hidden">PDF 출력</button>
+        ) : undefined}
+      />
 
       <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
         <div className="print:hidden">

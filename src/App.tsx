@@ -26,19 +26,13 @@ const SITE_NAV = [
 ];
 
 const TOOLS = [
-  { path: '/tools/aesa',        label: 'AEGIS Radar',       badge: 'Classic',  icon: '📡' },
-  { path: '/tools/c3',          label: 'AEGIS Cube',        badge: 'Flagship', icon: '⚡' },
-  { path: '/tools/pathfinder',  label: 'AEGIS Pathfinder',  badge: 'Prototype',icon: '🗺️' },
-  { path: '/tools/signal',      label: 'AEGIS Signal',      badge: 'Prototype',icon: '📊' },
-  { path: '/tools/video',       label: 'AEGIS Vision',      badge: 'Next-Gen', icon: '🎬' },
+  { path: '/tools/aesa',        label: 'AEGIS AESA Radar',        icon: '📡' },
+  { path: '/tools/c3',          label: 'AEGIS C³ Cube Strategy',  icon: '⚡' },
+  { path: '/tools/pathfinder',  label: 'AEGIS Pathfinder',        icon: '🗺️' },
+  { path: '/tools/signal',      label: 'AEGIS Signal',            icon: '📊' },
+  { path: '/tools/video',       label: 'AEGIS Vision',            icon: '🎬' },
 ];
 
-const BADGE_COLOR: Record<string, string> = {
-  Classic:   'bg-blue-500/10 text-blue-400',
-  Flagship:  'bg-indigo-500/10 text-indigo-300',
-  Prototype: 'bg-amber-500/10 text-amber-400',
-  'Next-Gen':'bg-emerald-500/10 text-emerald-400',
-};
 
 // ── 글로벌 네비게이션 ─────────────────────────────────────────────────────
 function GlobalNav() {
@@ -89,10 +83,7 @@ function GlobalNav() {
                   <Link key={t.path} to={t.path} onClick={() => setToolsOpen(false)}
                     className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors">
                     <span className="text-lg">{t.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-black text-white">{t.label}</div>
-                    </div>
-                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${BADGE_COLOR[t.badge]}`}>{t.badge}</span>
+                    <div className="text-xs font-black text-white">{t.label}</div>
                   </Link>
                 ))}
               </div>

@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import AppHeader from '@/shared/components/AppHeader';
 import { UploadCloud, Video, AlertCircle, Loader2, CheckCircle2, ChevronRight, Download } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
 import Markdown from 'react-markdown';
@@ -276,24 +277,18 @@ export default function VideoApp() {
       </Modal>
 
       {/* 앱 헤더 */}
-      <div className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-rose-600 rounded-lg flex items-center justify-center">
-            <Video className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <h1 className="text-base font-bold tracking-tight text-slate-900">AEGIS <span className="text-rose-600">Vision</span></h1>
-            <p className="text-[10px] text-slate-400">멀티모달 AEO·GEO 최적화 점수 진단</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
+      <AppHeader
+        icon="🎬" name="AEGIS Vision" accentPart="Vision"
+        subtitle="멀티모달 AEO·GEO 최적화 점수 진단"
+        accentColor="text-rose-600" iconBg="bg-rose-600" theme="light"
+        actions={<>
           {['guide','score'].map(id => (
-            <button key={id} onClick={() => setActiveModal(id)} className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-500 transition-colors">
+            <button key={id} onClick={() => setActiveModal(id)}>
               {id === 'guide' ? '앱 안내' : '평가 기준'}
             </button>
           ))}
-        </div>
-      </div>
+        </>}
+      />
 
       {/* 히든 PDF 컨테이너 */}
       <div style={{ position: 'absolute', top: -9999, left: -9999 }}>

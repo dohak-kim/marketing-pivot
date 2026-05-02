@@ -3,6 +3,7 @@ import { AnalysisResult, AnalysisStep, MarketingReport, AnalysisInputs } from '.
 import { GeminiService } from './services/geminiService';
 import { AnalysisLayout } from './components/AnalysisLayout';
 import { UserGuide } from './components/UserGuide';
+import AppHeader from '@/shared/components/AppHeader';
 
 const AesaApp: React.FC = () => {
   const [category, setCategory]       = useState('');
@@ -87,31 +88,17 @@ const AesaApp: React.FC = () => {
       <UserGuide isOpen={showGuide} onClose={() => setShowGuide(false)} />
 
       {/* 앱 헤더 */}
-      <div className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between no-print">
-        <div className="flex items-center gap-3">
-          <div className="bg-blue-600 p-2 rounded-lg shadow-sm">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M12 12a1 1 0 110-2 1 1 0 010 2z" />
-            </svg>
-          </div>
-          <div>
-            <h1 className="text-xl font-black text-gray-900 tracking-tight italic">
-              AEGIS <span className="text-blue-600">Radar</span>
-            </h1>
-            <p className="text-[10px] text-gray-400 font-medium">Intelligence Strategy Engine · PEST·3C·SWOT·STP</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
+      <AppHeader
+        icon="📡" name="AEGIS AESA Radar" accentPart="AESA Radar"
+        subtitle="Intelligence Strategy Engine · PEST·3C·SWOT·STP"
+        accentColor="text-blue-600" iconBg="bg-blue-600" theme="light"
+        actions={<>
           {step !== 'idle' && step !== 'error' && (
-            <button onClick={handleReset} className="text-sm font-black text-blue-600 hover:text-blue-800 bg-blue-50 px-5 py-2 rounded-full transition-colors">
-              새로운 분석
-            </button>
+            <button onClick={handleReset}>새로운 분석</button>
           )}
-          <button onClick={() => setShowGuide(true)} className="text-sm font-bold text-slate-500 hover:text-blue-600 px-4 py-2 rounded-full hover:bg-slate-50 transition-colors">
-            가이드
-          </button>
-        </div>
-      </div>
+          <button onClick={() => setShowGuide(true)}>가이드</button>
+        </>}
+      />
 
       <main className="max-w-7xl mx-auto px-8 py-12">
         {(step === 'idle' || step === 'error') ? (

@@ -782,7 +782,7 @@ const AppContent: React.FC = () => {
               <div className="mb-10 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
                 <div>
                   <h2 className="text-5xl sm:text-6xl font-black text-slate-900 dark:text-white mb-3 tracking-tighter leading-tight">
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-sky-400">AEGIS Cube</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-sky-400">AEGIS C³ Cube Strategy</span>
                     <span className="block text-2xl mt-2 text-slate-400 dark:text-slate-500 font-medium tracking-normal italic uppercase opacity-70">:// {lastDiscoveryValue}</span>
                   </h2>
 

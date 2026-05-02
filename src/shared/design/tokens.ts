@@ -10,8 +10,8 @@ export const BRAND = {
 
 // Classic → Drastic 순서: Marketing Pivot — From Classic to Drastic
 export const APPS = {
-  aesa:        { color: '#2563EB', label: 'AEGIS Radar',       icon: '📡', desc: 'Classic — PEST·3C·SWOT·STP 전략' },
-  aegis:       { color: '#5B52F5', label: 'AEGIS Cube',        icon: '⚡', desc: 'Drastic — C³ Cube Strategy Model' },
+  aesa:        { color: '#2563EB', label: 'AEGIS AESA Radar',        icon: '📡', desc: 'Classic — PEST·3C·SWOT·STP 전략' },
+  aegis:       { color: '#5B52F5', label: 'AEGIS C³ Cube Strategy',  icon: '⚡', desc: 'Drastic — C³ Cube Strategy Model' },
   cdj:         { color: '#F59E0B', label: 'AEGIS Pathfinder',  icon: '🗺️', desc: 'CDJ 고객 구매여정 분석' },
   cep:         { color: '#8B5CF6', label: 'AEGIS Signal',      icon: '📊', desc: 'CEP 트렌드·페르소나 분석' },
   video:       { color: '#EF4444', label: 'AEGIS Vision',      icon: '🎬', desc: '멀티모달 AEO/GEO 영상 분석' },

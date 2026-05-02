@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import AppHeader from '@/shared/components/AppHeader';
 import { InputForm } from './components/InputForm';
 import { InputGuide } from './components/InputGuide';
 import { ResultsDashboard } from './components/ResultsDashboard';
@@ -53,25 +54,18 @@ const CdjApp: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white font-sans">
-      {/* 앱 헤더 (GlobalNav 아래) */}
-      <div className="border-b border-white/5 px-6 py-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-black tracking-tight">
-            AEGIS <span className="text-amber-400">Pathfinder</span>
-          </h1>
-          <p className="text-xs text-slate-400 mt-0.5">고객 구매여정 분석 · 콘텐츠 전략 · 크리에이티브 One-Stop</p>
-        </div>
-        <div className="flex gap-2">
-          {(['about', 'usage', 'interpretation'] as const).map(key => (
-            <button
-              key={key}
-              onClick={() => setActiveModal(key)}
-              className="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 transition-colors"
-            >
+      <AppHeader
+        icon="🗺️" name="AEGIS Pathfinder" accentPart="Pathfinder"
+        subtitle="CDJ 고객 구매여정 분석 · 콘텐츠 전략 · 크리에이티브"
+        accentColor="text-amber-400" iconBg="bg-amber-500" theme="dark"
+        actions={<>
+          {(['about','usage','interpretation'] as const).map(key => (
+            <button key={key} onClick={() => setActiveModal(key)}>
               {key === 'about' ? '앱 소개' : key === 'usage' ? '사용법' : '결과 해석'}
             </button>
           ))}
-        </div>
+        </>}
+      />
       </div>
 
       <main className="container mx-auto px-4 py-8">
