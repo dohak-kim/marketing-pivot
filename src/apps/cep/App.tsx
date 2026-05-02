@@ -159,7 +159,7 @@ const CepApp: React.FC = () => {
       <div className="border-b border-white/5 px-6 py-4 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-black tracking-tight">
-            CEP <span className="text-violet-400">Trend Analyzer</span>
+            AEGIS <span className="text-violet-400">Signal</span>
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">CEP 트렌드 · 타겟 페르소나 · AEO 콘텐츠 분석</p>
         </div>

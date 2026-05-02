@@ -28,9 +28,9 @@ export default function Product() {
 
         {/* 3개 솔루션 카드 */}
         {[
-          { badge: 'Classic', color: 'border-blue-500/30', icon: '📡', name: 'AESA Radar', tagline: '전통 마케팅 프레임워크의 데이터 기반 혁신', features: ['시장 규모 자동 분석', 'PEST·3C·SWOT·STP', '경쟁 포지셔닝 맵', '전략 보고서 PDF'], path: '/tools/aesa' },
-          { badge: 'Flagship', color: 'border-indigo-500/30 ring-1 ring-indigo-500/20', icon: '⚡', name: 'C³ Cube Strategy', tagline: 'CEP·CDJ·Intent 통합 마케팅 인텔리전스', features: ['실측 SERP 데이터 (Serper·Naver)', 'CEP 자동 클러스터링', 'Hub & Spoke 미디어 전략', 'AEGIS FORGE 콘텐츠 생성', '4종 내보내기 (CSV·JSON·MD·PDF)'], path: '/tools/c3' },
-          { badge: 'Next-Gen', color: 'border-emerald-500/30', icon: '🎬', name: 'Video AEO/GEO', tagline: '멀티모달 영상 콘텐츠 AI 검색 최적화 진단', features: ['OCR·STT 멀티모달 분석', '플랫폼별 AEO 스코어링', 'Top 3 Action Items', 'PDF 진단 리포트'], path: '/tools/video' },
+          { badge: 'Classic', color: 'border-blue-500/30', icon: '📡', name: 'AEGIS Radar', tagline: '전통 마케팅 프레임워크의 데이터 기반 혁신', features: ['시장 규모 자동 분석', 'PEST·3C·SWOT·STP', '경쟁 포지셔닝 맵', '전략 보고서 PDF'], path: '/tools/aesa' },
+          { badge: 'Flagship', color: 'border-indigo-500/30 ring-1 ring-indigo-500/20', icon: '⚡', name: 'AEGIS Cube', tagline: 'CEP·CDJ·Intent 통합 마케팅 인텔리전스 (C³ Cube Strategy)', features: ['실측 SERP 데이터 (Serper·Naver)', 'CEP 자동 클러스터링', 'Hub & Spoke 미디어 전략', 'AEGIS FORGE 콘텐츠 생성', '4종 내보내기 (CSV·JSON·MD·PDF)'], path: '/tools/c3' },
+          { badge: 'Next-Gen', color: 'border-emerald-500/30', icon: '🎬', name: 'AEGIS Vision', tagline: '멀티모달 영상 콘텐츠 AEO/GEO 최적화 진단', features: ['OCR·STT 멀티모달 분석', '플랫폼별 AEO 스코어링', 'Top 3 Action Items', 'PDF 진단 리포트'], path: '/tools/video' },
         ].map(p => (
           <div key={p.name} className={`mb-6 p-8 rounded-3xl bg-slate-900 border ${p.color}`}>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">

@@ -57,7 +57,7 @@ const CdjApp: React.FC = () => {
       <div className="border-b border-white/5 px-6 py-4 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-black tracking-tight">
-            CDJ <span className="text-amber-400">마스터</span>
+            AEGIS <span className="text-amber-400">Pathfinder</span>
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">고객 구매여정 분석 · 콘텐츠 전략 · 크리에이티브 One-Stop</p>
         </div>

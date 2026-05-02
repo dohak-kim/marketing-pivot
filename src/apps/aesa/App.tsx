@@ -96,7 +96,7 @@ const AesaApp: React.FC = () => {
           </div>
           <div>
             <h1 className="text-xl font-black text-gray-900 tracking-tight italic">
-              AESA <span className="text-blue-600">Rader</span>
+              AEGIS <span className="text-blue-600">Radar</span>
             </h1>
             <p className="text-[10px] text-gray-400 font-medium">Intelligence Strategy Engine · PEST·3C·SWOT·STP</p>
           </div>

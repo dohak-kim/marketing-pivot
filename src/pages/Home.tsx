@@ -100,7 +100,7 @@ const Services = () => {
       badge: 'Classic',
       badgeColor: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
       icon: '📡',
-      name: 'AESA Radar',
+      name: 'AEGIS Radar',
       desc: '전통적 마케팅 프레임워크(PEST·3C·SWOT·STP)를 온라인 실측 데이터(Naver News·DataLab) 기반으로 자동 분석합니다.',
       features: ['시장규모 자동 분석', 'PEST·3C·SWOT', 'STP 전략 도출', 'PDF 보고서'],
       cta: '무료 분석 시작',
@@ -111,7 +111,7 @@ const Services = () => {
       badge: 'Flagship',
       badgeColor: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
       icon: '⚡',
-      name: 'C³ Cube Strategy',
+      name: 'AEGIS Cube',
       desc: 'Context × Conversion × Cognition 큐브 전략 모델. 실측 SERP 데이터 기반 CEP 분석부터 Hub & Spoke 미디어 전략, FORGE 콘텐츠 생성까지 원스톱.',
       features: ['실측 SERP 데이터', 'CEP 클러스터링', 'Hub & Spoke 전략', 'AEGIS FORGE'],
       cta: '전략 분석 시작',
@@ -123,7 +123,7 @@ const Services = () => {
       badge: 'Next-Gen',
       badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
       icon: '🎬',
-      name: 'Video AEO/GEO',
+      name: 'AEGIS Vision',
       desc: '영상 콘텐츠의 멀티모달(OCR·STT) 신호를 분석해 AEO·GEO 최적화 점수와 개선 방향을 제시합니다.',
       features: ['OCR·STT 분석', '플랫폼별 스코어링', 'Action Items', 'PDF 진단 리포트'],
       cta: '영상 진단 시작',
@@ -173,7 +173,7 @@ const Services = () => {
           <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mb-4">C³ Cube 프로토타입 도구 (무료)</p>
           <div className="flex flex-wrap gap-3">
             {[{ name: 'AEGIS Pathfinder', desc: 'CDJ 여정 분석', path: '/tools/pathfinder', color: 'text-amber-400' },
-              { name: 'AEGIS Signal', desc: 'CEP 트렌드 분석', path: '/tools/signal', color: 'text-violet-400' }].map(t => (
+              { name: 'AEGIS Signal',     desc: 'CEP 트렌드 분석', path: '/tools/signal', color: 'text-violet-400' }].map(t => (
               <Link key={t.name} to={t.path} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-white/5 transition-all">
                 <span className={`text-xs font-black ${t.color}`}>{t.name}</span>
                 <span className="text-[10px] text-slate-500">{t.desc}</span>

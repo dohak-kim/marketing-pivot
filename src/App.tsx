@@ -26,11 +26,11 @@ const SITE_NAV = [
 ];
 
 const TOOLS = [
-  { path: '/tools/aesa',        label: 'AESA Radar',        badge: 'Classic',  icon: '📡' },
-  { path: '/tools/c3',          label: 'C³ Cube Strategy',  badge: 'Flagship', icon: '⚡' },
+  { path: '/tools/aesa',        label: 'AEGIS Radar',       badge: 'Classic',  icon: '📡' },
+  { path: '/tools/c3',          label: 'AEGIS Cube',        badge: 'Flagship', icon: '⚡' },
   { path: '/tools/pathfinder',  label: 'AEGIS Pathfinder',  badge: 'Prototype',icon: '🗺️' },
   { path: '/tools/signal',      label: 'AEGIS Signal',      badge: 'Prototype',icon: '📊' },
-  { path: '/tools/video',       label: 'Video AEO/GEO',     badge: 'Next-Gen', icon: '🎬' },
+  { path: '/tools/video',       label: 'AEGIS Vision',      badge: 'Next-Gen', icon: '🎬' },
 ];
 
 const BADGE_COLOR: Record<string, string> = {

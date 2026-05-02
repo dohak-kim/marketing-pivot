@@ -282,7 +282,7 @@ export default function VideoApp() {
             <Video className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h1 className="text-base font-bold tracking-tight text-slate-900">Video <span className="text-rose-600">AEO/GEO Analyzer</span></h1>
+            <h1 className="text-base font-bold tracking-tight text-slate-900">AEGIS <span className="text-rose-600">Vision</span></h1>
             <p className="text-[10px] text-slate-400">멀티모달 AEO·GEO 최적화 점수 진단</p>
           </div>
         </div>
