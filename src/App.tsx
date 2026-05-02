@@ -163,7 +163,7 @@ function AppContent() {
             <Route path="/pricing"     element={<Pricing />} />
 
             {/* 도구 */}
-            <Route path="/tools/aesa/*"       element={<div className="pt-14"><AesaApp /></div>} />
+            <Route path="/tools/aesa/*"       element={<div className="pt-[5.5rem]"><AesaApp /></div>} />
             <Route path="/tools/c3/*"         element={<div className="pt-[5.5rem]"><AegisApp /></div>} />
             <Route path="/tools/pathfinder/*" element={<div className="pt-[5.5rem]"><PathfinderApp /></div>} />
             <Route path="/tools/signal/*"     element={<div className="pt-[5.5rem]"><SignalApp /></div>} />
