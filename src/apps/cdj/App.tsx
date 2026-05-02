@@ -66,7 +66,6 @@ const CdjApp: React.FC = () => {
           ))}
         </>}
       />
-      </div>
 
       <main className="container mx-auto px-4 py-8">
         <InputForm onAnalyze={handleAnalysis} isLoading={isLoading} />
