@@ -6,8 +6,12 @@ const Home     = lazy(() => import('@/pages/Home'));
 const Guides   = lazy(() => import('@/pages/Guides'));
 const Compare  = lazy(() => import('@/pages/Compare'));
 const Blog     = lazy(() => import('@/pages/Blog'));
+const BlogPost = lazy(() => import('@/pages/BlogPost'));
 const Product  = lazy(() => import('@/pages/Product'));
 const Pricing  = lazy(() => import('@/pages/Pricing'));
+
+// ── 어드민 ────────────────────────────────────────────────────────────────
+const BlogEditorApp = lazy(() => import('@/apps/blog-editor/App'));
 
 // ── 도구 ─────────────────────────────────────────────────────────────────
 const AesaApp      = lazy(() => import('@/apps/aesa/App'));
@@ -46,12 +50,7 @@ function GlobalNav() {
         <div className="max-w-7xl mx-auto px-6 flex items-center h-14 gap-8">
           {/* 로고 */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <span className="text-sm font-black text-white tracking-tight">
-              Marketing<span className="text-indigo-400">·</span>Pivot
-            </span>
-            <span className="hidden sm:block text-[9px] text-slate-500 font-bold uppercase tracking-widest border-l border-white/10 pl-2">
-              Project AEGIS
-            </span>
+            <img src="/logo-aegis-full.png" alt="Project AEGIS" className="h-7 w-auto object-contain" />
           </Link>
 
           {/* 사이트 메뉴 */}
@@ -119,9 +118,12 @@ function Footer() {
   return (
     <footer className="bg-slate-950 border-t border-white/5 py-12">
       <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div>
-          <span className="text-sm font-black text-white">Marketing<span className="text-indigo-400">·</span>Pivot</span>
-          <p className="text-xs text-slate-500 mt-1">From Classic to Drastic · Project AEGIS</p>
+        <div className="flex items-center gap-3">
+          <img src="/logo-aegis-icon.png" alt="Project AEGIS" className="h-8 w-auto object-contain opacity-80" />
+          <div>
+            <span className="text-sm font-black text-white">Marketing<span className="text-indigo-400">·</span>Pivot</span>
+            <p className="text-xs text-slate-500 mt-0.5">From Classic to Drastic · Project AEGIS</p>
+          </div>
         </div>
         <div className="flex items-center gap-6 text-xs text-slate-500">
           {SITE_NAV.map(n => <Link key={n.path} to={n.path} className="hover:text-slate-300 transition-colors">{n.label}</Link>)}
@@ -141,20 +143,24 @@ function Loading() {
 }
 
 // ── 앱 루트 ───────────────────────────────────────────────────────────────
-export default function App() {
+function AppContent() {
+  const { pathname } = useLocation();
+  const isAdmin = pathname.startsWith('/admin');
+
   return (
-    <BrowserRouter>
-      <GlobalNav />
+    <>
+      {!isAdmin && <GlobalNav />}
       <main>
         <Suspense fallback={<Loading />}>
           <Routes>
             {/* 마케팅 페이지 */}
-            <Route path="/"          element={<Home />} />
-            <Route path="/guides"    element={<Guides />} />
-            <Route path="/compare"   element={<Compare />} />
-            <Route path="/blog"      element={<Blog />} />
-            <Route path="/product"   element={<Product />} />
-            <Route path="/pricing"   element={<Pricing />} />
+            <Route path="/"            element={<Home />} />
+            <Route path="/guides"      element={<Guides />} />
+            <Route path="/compare"     element={<Compare />} />
+            <Route path="/blog"        element={<Blog />} />
+            <Route path="/blog/:slug"  element={<BlogPost />} />
+            <Route path="/product"     element={<Product />} />
+            <Route path="/pricing"     element={<Pricing />} />
 
             {/* 도구 */}
             <Route path="/tools/aesa/*"       element={<div className="pt-14"><AesaApp /></div>} />
@@ -162,10 +168,21 @@ export default function App() {
             <Route path="/tools/pathfinder/*" element={<div className="pt-[5.5rem]"><PathfinderApp /></div>} />
             <Route path="/tools/signal/*"     element={<div className="pt-[5.5rem]"><SignalApp /></div>} />
             <Route path="/tools/video/*"      element={<div className="pt-[5.5rem]"><VideoApp /></div>} />
+
+            {/* 어드민 (GlobalNav/Footer 없음) */}
+            <Route path="/admin/blog" element={<BlogEditorApp />} />
           </Routes>
         </Suspense>
       </main>
-      <Footer />
+      {!isAdmin && <Footer />}
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   );
 }

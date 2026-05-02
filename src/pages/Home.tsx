@@ -23,9 +23,8 @@ const Hero = () => (
     <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl" />
 
     <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
-      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold uppercase tracking-widest mb-8">
-        Project AEGIS · Marketing Intelligence Platform
-      </div>
+      <img src="/logo-aegis-full.png" alt="Project AEGIS"
+        className="h-12 md:h-16 w-auto object-contain mx-auto mb-8 opacity-90" />
       <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight leading-none mb-6">
         Marketing<br />
         <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-blue-400">Pivot</span>
