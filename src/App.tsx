@@ -8,10 +8,11 @@ const AesaApp   = lazy(() => import('@/apps/aesa/App'));
 const CepApp    = lazy(() => import('@/apps/cep/App'));
 const VideoApp  = lazy(() => import('@/apps/video/App'));
 
+// AESA(Classic) → AEGIS(Drastic) 순서: Marketing Pivot — From Classic to Drastic
 const NAV_ITEMS: { path: string; key: AppKey }[] = [
-  { path: '/',       key: 'aegis'  },
+  { path: '/',       key: 'aesa'   },
+  { path: '/aegis',  key: 'aegis'  },
   { path: '/cdj',    key: 'cdj'    },
-  { path: '/aesa',   key: 'aesa'   },
   { path: '/cep',    key: 'cep'    },
   { path: '/video',  key: 'video'  },
 ];
@@ -67,10 +68,10 @@ export default function App() {
       <div className="pt-12">
         <Suspense fallback={<LoadingScreen />}>
           <Routes>
-            <Route path="/"       element={<AegisApp />} />
-            <Route path="/cdj/*"  element={<CdjApp />} />
-            <Route path="/aesa/*" element={<AesaApp />} />
-            <Route path="/cep/*"  element={<CepApp />} />
+            <Route path="/"        element={<AesaApp />} />
+            <Route path="/aegis/*" element={<AegisApp />} />
+            <Route path="/cdj/*"   element={<CdjApp />} />
+            <Route path="/cep/*"   element={<CepApp />} />
             <Route path="/video/*" element={<VideoApp />} />
           </Routes>
         </Suspense>
