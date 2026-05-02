@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ExecutionPlan, OwnedMediaPlan, VeoPromptPair } from '../core/context';
 
 // ── 구형 plan 마이그레이션 ───────────────────────────────────────────────────
@@ -173,15 +174,26 @@ const MediaSection: React.FC<MediaSectionProps> = ({ tier, defaultOpen = true, c
 
 // ── FORGE Veo 크리에이티브 섹션 ────────────────────────────────────────────────
 
-interface ForgeVeoSectionProps { prompts: VeoPromptPair; }
+interface ForgeVeoSectionProps { prompts: VeoPromptPair; situationSummary?: string; }
 
-const ForgeVeoSection: React.FC<ForgeVeoSectionProps> = ({ prompts }) => {
+const ForgeVeoSection: React.FC<ForgeVeoSectionProps> = ({ prompts, situationSummary }) => {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const copy = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
     setCopiedKey(key);
     setTimeout(() => setCopiedKey(null), 2000);
+  };
+
+  const openInForge = () => {
+    sessionStorage.setItem('forge_context', JSON.stringify({
+      source: 'c3',
+      situationSummary: situationSummary ?? '',
+      reels15s: prompts.reels15s,
+      shorts30s: prompts.shorts30s,
+    }));
+    navigate('/tools/forge');
   };
 
   const cards = [
@@ -210,9 +222,20 @@ const ForgeVeoSection: React.FC<ForgeVeoSectionProps> = ({ prompts }) => {
         <span className="text-[10px] font-black uppercase tracking-widest text-orange-700 dark:text-orange-300">
           FORGE · Veo 크리에이티브
         </span>
-        <span className="ml-auto text-[7px] font-black px-1.5 py-0.5 rounded-full bg-white/60 dark:bg-white/10 text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-          Veo 3.1
-        </span>
+        <div className="ml-auto flex items-center gap-2">
+          <span className="text-[7px] font-black px-1.5 py-0.5 rounded-full bg-white/60 dark:bg-white/10 text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            Veo 3.1
+          </span>
+          <button
+            onClick={openInForge}
+            className="flex items-center gap-1 text-[9px] font-black px-2.5 py-1 rounded-lg bg-orange-500 hover:bg-orange-600 text-white transition-colors"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            FORGE에서 열기
+          </button>
+        </div>
       </div>
       <div className="p-4 bg-white dark:bg-white/[0.02] space-y-3">
         {cards.filter(c => c.text).map(card => (
@@ -423,7 +446,7 @@ const StrategicBrief: React.FC<StrategicBriefProps> = ({ plan: rawPlan, isLoadin
 
       {/* ── 7. AEGIS FORGE — Veo 크리에이티브 프롬프트 ── */}
       {plan.veoPrompts && (plan.veoPrompts.reels15s || plan.veoPrompts.shorts30s) && (
-        <ForgeVeoSection prompts={plan.veoPrompts} />
+        <ForgeVeoSection prompts={plan.veoPrompts} situationSummary={plan.situationSummary} />
       )}
     </div>
   );

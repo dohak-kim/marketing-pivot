@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import AppHeader from '@/shared/components/AppHeader';
 import {
   generateReelStoryboards, generateSceneImage, generateVeoVideo, generateAdImage,
@@ -7,6 +7,13 @@ import {
 import { generateBlogImage, type ImageStyleConfig } from '@/lib/imageService';
 
 type Tab = 'reels' | 'adimage' | 'blogimage';
+
+interface ForgeContext {
+  source: 'c3';
+  situationSummary: string;
+  reels15s: string;
+  shorts30s: string;
+}
 
 // ── 공통 유틸 ─────────────────────────────────────────────────────────────
 function fileToBase64(file: File): Promise<{ base64: string; mimeType: string }> {
@@ -30,8 +37,14 @@ function ErrMsg({ msg }: { msg: string }) {
 }
 
 // ── 탭 1: Reels 크리에이터 ────────────────────────────────────────────────
-function ReelsCreator() {
-  const [message, setMessage]         = useState('');
+interface ReelsCreatorProps {
+  injectedMessage?: string;
+  injectedVeo15s?: string;
+  injectedVeo30s?: string;
+}
+
+function ReelsCreator({ injectedMessage, injectedVeo15s, injectedVeo30s }: ReelsCreatorProps) {
+  const [message, setMessage]         = useState(injectedMessage ?? '');
   const [assets, setAssets]           = useState<StoryboardAsset[]>([]);
   const [boards, setBoards]           = useState<ReelStoryboard[]>([]);
   const [selected, setSelected]       = useState<number | null>(null);
@@ -39,6 +52,10 @@ function ReelsCreator() {
   const [videoUrls, setVideoUrls]     = useState<Record<string, string>>({});
   const [loading, setLoading]         = useState<string | null>(null);
   const [error, setError]             = useState<string | null>(null);
+
+  useEffect(() => {
+    if (injectedMessage) setMessage(injectedMessage);
+  }, [injectedMessage]);
 
   const assetTypes: AssetType[] = ['logo', 'product', 'model', 'store', 'background'];
   const assetLabel: Record<AssetType, string> = {
@@ -95,6 +112,30 @@ function ReelsCreator() {
 
   return (
     <div className="space-y-6">
+      {/* C³ 주입 배너 */}
+      {(injectedVeo15s || injectedVeo30s) && (
+        <div className="bg-orange-500/10 border border-orange-500/30 rounded-2xl p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+            <span className="text-[10px] font-black text-orange-400 uppercase tracking-widest">
+              C³ 전략에서 Veo 프롬프트가 주입되었습니다
+            </span>
+          </div>
+          {injectedVeo15s && (
+            <div className="space-y-1">
+              <p className="text-[9px] font-black text-orange-300/70 uppercase tracking-wider">REELS 15S 프롬프트</p>
+              <p className="text-[10px] text-slate-300 font-mono leading-relaxed bg-slate-900/60 rounded-lg px-3 py-2 break-words">{injectedVeo15s}</p>
+            </div>
+          )}
+          {injectedVeo30s && (
+            <div className="space-y-1">
+              <p className="text-[9px] font-black text-violet-300/70 uppercase tracking-wider">SHORTS 30S 프롬프트</p>
+              <p className="text-[10px] text-slate-300 font-mono leading-relaxed bg-slate-900/60 rounded-lg px-3 py-2 break-words">{injectedVeo30s}</p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Step 1: 메시지 + 자산 */}
       <div className="bg-slate-900 border border-white/5 rounded-2xl p-6 space-y-4">
         <h2 className="text-sm font-black text-white flex items-center gap-2">
@@ -469,7 +510,19 @@ const TABS: { key: Tab; icon: string; label: string }[] = [
 ];
 
 export default function ForgeApp() {
-  const [tab, setTab] = useState<Tab>('reels');
+  const [tab, setTab]                     = useState<Tab>('reels');
+  const [forgeCtx, setForgeCtx]           = useState<ForgeContext | null>(null);
+
+  useEffect(() => {
+    const raw = sessionStorage.getItem('forge_context');
+    if (!raw) return;
+    try {
+      const ctx: ForgeContext = JSON.parse(raw);
+      setForgeCtx(ctx);
+      setTab('reels');
+    } catch {}
+    sessionStorage.removeItem('forge_context');
+  }, []);
 
   return (
     <>
@@ -498,8 +551,28 @@ export default function ForgeApp() {
           </div>
         </div>
 
+        {/* C³ 전략 컨텍스트 배너 */}
+        {forgeCtx && forgeCtx.situationSummary && (
+          <div className="bg-slate-900/80 border-b border-orange-500/20">
+            <div className="max-w-6xl mx-auto px-6 py-2.5 flex items-center gap-2">
+              <span className="text-[8px] font-black text-orange-400 uppercase tracking-widest shrink-0">C³ 전략 컨텍스트</span>
+              <p className="text-[10px] text-slate-400 truncate">{forgeCtx.situationSummary}</p>
+              <button
+                onClick={() => setForgeCtx(null)}
+                className="shrink-0 ml-auto text-[9px] text-slate-600 hover:text-slate-400 transition-colors"
+              >✕</button>
+            </div>
+          </div>
+        )}
+
         <main className="max-w-6xl mx-auto px-6 py-8">
-          {tab === 'reels'     && <ReelsCreator />}
+          {tab === 'reels' && (
+            <ReelsCreator
+              injectedMessage={forgeCtx?.situationSummary}
+              injectedVeo15s={forgeCtx?.reels15s}
+              injectedVeo30s={forgeCtx?.shorts30s}
+            />
+          )}
           {tab === 'adimage'   && <AdImageCreator />}
           {tab === 'blogimage' && <BlogImageCreator />}
         </main>
