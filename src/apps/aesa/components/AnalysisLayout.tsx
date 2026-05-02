@@ -475,19 +475,28 @@ export const AnalysisLayout: React.FC<AnalysisLayoutProps> = ({ result, keyword,
             fileName={`AESA_Report_${new Date().toISOString().slice(0,10)}.pdf`}
             className="bg-white text-[#002d72] px-10 py-4 rounded-2xl font-black text-xl shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-4 shrink-0 no-underline"
           >
-            {({ loading }) => loading ? (
+            {({ loading, error }) => (
               <span className="flex items-center gap-3">
-                <div className="w-6 h-6 border-[3px] border-blue-200 border-t-[#002d72] rounded-full animate-spin"></div>
-                PDF 생성 중...
-              </span>
-            ) : (
-              <span className="flex items-center gap-3">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="7 10 12 15 17 10"/>
-                  <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                전략 보고서 PDF 다운로드
+                {loading ? (
+                  <>
+                    <div className="w-6 h-6 border-[3px] border-blue-200 border-t-[#002d72] rounded-full animate-spin" />
+                    PDF 생성 중... (폰트 로딩 포함)
+                  </>
+                ) : error ? (
+                  <>
+                    <span className="text-red-500">⚠</span>
+                    오류 발생 — 클릭하여 재시도
+                  </>
+                ) : (
+                  <>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                      <polyline points="7 10 12 15 17 10"/>
+                      <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    전략 보고서 PDF 다운로드
+                  </>
+                )}
               </span>
             )}
           </PDFDownloadLink>

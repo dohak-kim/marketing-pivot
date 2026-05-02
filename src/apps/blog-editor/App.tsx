@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useEditor, EditorContent, Extension } from '@tiptap/react';
+import { useEditor, EditorContent, Extension, ReactNodeViewRenderer } from '@tiptap/react';
+import Image from '@tiptap/extension-image';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
@@ -60,6 +61,7 @@ const Indent = Extension.create({
   },
 });
 import { generateAllSchemas } from '@/lib/blogSchema';
+import { generateBlogImage, type ImageStyleConfig, type ImageType, type ImageTone, type ImageColor } from '@/lib/imageService';
 import type { BlogPost, BlogFaq, HowToStep, BlogQuote } from '@/types/blog';
 
 // ── 상수 ──────────────────────────────────────────────────────────────────
@@ -156,6 +158,137 @@ function ToolBtn({ active, onClick, title, children }: {
 
 const SEP = () => <div className="w-px h-4 bg-white/10 mx-0.5 shrink-0" />;
 
+// ── 이미지 생성 모달 ───────────────────────────────────────────────────────
+const IMAGE_TYPES:  ImageType[]  = ['Infographic', 'Illustration', 'Photography', 'Cartoon'];
+const IMAGE_TONES:  ImageTone[]  = ['Professional', 'Friendly', 'Futuristic', 'Minimalist'];
+const IMAGE_COLORS: ImageColor[] = ['Vibrant', 'Pastel', 'Monochrome', 'Warm', 'Cool'];
+
+const TONE_KR:  Record<ImageTone,  string> = { Professional: '전문적', Friendly: '친근한', Futuristic: '미래적', Minimalist: '미니멀' };
+const COLOR_KR: Record<ImageColor, string> = { Vibrant: '선명', Pastel: '파스텔', Monochrome: '모노크롬', Warm: '웜톤', Cool: '쿨톤' };
+const TYPE_KR:  Record<ImageType,  string> = { Infographic: '인포그래픽', Illustration: '일러스트', Photography: '포토', Cartoon: '카툰' };
+
+function ImageGenModal({ onInsert, onClose }: {
+  onInsert: (src: string, alt: string) => void;
+  onClose: () => void;
+}) {
+  const [heading, setHeading]   = useState('');
+  const [context, setContext]   = useState('');
+  const [style, setStyle]       = useState<ImageStyleConfig>({ type: 'Infographic', tone: 'Professional', color: 'Vibrant' });
+  const [loading, setLoading]   = useState(false);
+  const [preview, setPreview]   = useState<string | null>(null);
+  const [error, setError]       = useState<string | null>(null);
+
+  const generate = async () => {
+    if (!heading.trim()) { setError('이미지 주제(섹션 제목)를 입력해주세요.'); return; }
+    setLoading(true); setError(null); setPreview(null);
+    try {
+      const src = await generateBlogImage(heading, context, style);
+      setPreview(src);
+    } catch (e: any) {
+      setError(e.message || '이미지 생성 중 오류가 발생했습니다.');
+    } finally { setLoading(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4">
+      <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden">
+        {/* 헤더 */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+          <div>
+            <h2 className="text-sm font-black text-white">🖼 AI 이미지 생성</h2>
+            <p className="text-[10px] text-slate-500 mt-0.5">Gemini 2.5 Flash Image · 블로그 섹션용 16:9</p>
+          </div>
+          <button onClick={onClose} className="text-slate-500 hover:text-white text-xl transition-colors">✕</button>
+        </div>
+
+        <div className="p-6 grid grid-cols-2 gap-5">
+          {/* 왼쪽: 설정 */}
+          <div className="space-y-4">
+            <div>
+              <label className="meta-label">섹션 제목 (이미지 주제)</label>
+              <input value={heading} onChange={e => setHeading(e.target.value)}
+                placeholder="예: AI 검색 최적화의 3단계"
+                className="meta-input" />
+            </div>
+            <div>
+              <label className="meta-label">맥락 설명 (선택)</label>
+              <textarea value={context} onChange={e => setContext(e.target.value)}
+                rows={3} placeholder="이미지와 함께 표현할 내용을 간략히 입력하세요"
+                className="meta-input resize-none" />
+            </div>
+
+            {/* 스타일 설정 */}
+            <div>
+              <label className="meta-label">이미지 유형</label>
+              <div className="grid grid-cols-2 gap-1.5">
+                {IMAGE_TYPES.map(t => (
+                  <button key={t} onClick={() => setStyle(s => ({ ...s, type: t }))}
+                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-colors ${style.type === t ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-800 border-white/5 text-slate-400 hover:text-white'}`}>
+                    {TYPE_KR[t]}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="meta-label">톤</label>
+              <div className="grid grid-cols-2 gap-1.5">
+                {IMAGE_TONES.map(t => (
+                  <button key={t} onClick={() => setStyle(s => ({ ...s, tone: t }))}
+                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-colors ${style.tone === t ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-800 border-white/5 text-slate-400 hover:text-white'}`}>
+                    {TONE_KR[t]}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="meta-label">색상 팔레트</label>
+              <div className="grid grid-cols-3 gap-1.5">
+                {IMAGE_COLORS.map(c => (
+                  <button key={c} onClick={() => setStyle(s => ({ ...s, color: c }))}
+                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-colors ${style.color === c ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-800 border-white/5 text-slate-400 hover:text-white'}`}>
+                    {COLOR_KR[c]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button onClick={generate} disabled={loading}
+              className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white text-xs font-black rounded-xl transition-colors flex items-center justify-center gap-2">
+              {loading ? (
+                <><div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />생성 중...</>
+              ) : '✨ 이미지 생성'}
+            </button>
+            {error && <p className="text-[10px] text-rose-400 text-center">{error}</p>}
+          </div>
+
+          {/* 오른쪽: 미리보기 */}
+          <div className="flex flex-col gap-3">
+            <label className="meta-label">미리보기</label>
+            <div className="flex-1 bg-slate-800 rounded-xl border border-white/5 flex items-center justify-center overflow-hidden aspect-video">
+              {preview
+                ? <img src={preview} alt="Generated" className="w-full h-full object-cover rounded-xl" />
+                : <p className="text-[10px] text-slate-600 text-center px-4">이미지 생성 버튼을 클릭하면<br/>여기에 미리보기가 표시됩니다</p>
+              }
+            </div>
+            {preview && (
+              <button onClick={() => onInsert(preview, heading)}
+                className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-xl transition-colors">
+                ✅ 에디터에 삽입
+              </button>
+            )}
+            {preview && (
+              <button onClick={generate} disabled={loading}
+                className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition-colors">
+                🔄 재생성
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const COLOR_PALETTE = [
   { label: '기본',   color: '' },
   { label: '흰색',   color: '#f1f5f9' },
@@ -172,7 +305,10 @@ const COLOR_PALETTE = [
 ];
 
 // ── WYSIWYG 툴바 ──────────────────────────────────────────────────────────
-function EditorToolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
+function EditorToolbar({ editor, onImageOpen }: {
+  editor: ReturnType<typeof useEditor>;
+  onImageOpen: () => void;
+}) {
   const [colorOpen, setColorOpen] = useState(false);
   if (!editor) return null;
 
@@ -261,6 +397,7 @@ function EditorToolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
 
         {/* 삽입 */}
         <ToolBtn active={editor.isActive('link')} onClick={addLink} title="링크 삽입">🔗 링크</ToolBtn>
+        <ToolBtn active={false} onClick={onImageOpen} title="AI 이미지 생성 및 삽입">🖼 이미지</ToolBtn>
         <ToolBtn active={false} onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} title="표 삽입 (3×3)">⊞ 표</ToolBtn>
         <ToolBtn active={false} onClick={() => editor.chain().focus().setHorizontalRule().run()} title="구분선">— 선</ToolBtn>
 
@@ -357,6 +494,7 @@ export default function BlogEditorApp() {
   const [tagsRaw, setTagsRaw]   = useState('');
   const [rightTab, setRightTab] = useState<'schema' | 'checklist'>('checklist');
   const [savedAt, setSavedAt]   = useState<string | null>(null);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>();
 
   const editor = useEditor({
@@ -369,6 +507,7 @@ export default function BlogEditorApp() {
       Color,
       TextAlign.configure({ types: ['heading', 'paragraph'] }),
       Indent,
+      Image.configure({ inline: false, allowBase64: true }),
       Table.configure({ resizable: false }),
       TableRow,
       TableHeader,
@@ -481,6 +620,8 @@ export default function BlogEditorApp() {
         .tiptap-editor th { background: rgba(255,255,255,0.05); padding: 0.5rem 0.75rem; text-align: left; font-size: 0.75rem; font-weight: 700; color: #94a3b8; border: 1px solid rgba(255,255,255,0.08); }
         .tiptap-editor td { padding: 0.5rem 0.75rem; font-size: 0.75rem; color: #94a3b8; border: 1px solid rgba(255,255,255,0.06); }
         .tiptap-editor hr { border-color: rgba(255,255,255,0.08); margin: 1.5rem 0; }
+        .tiptap-editor img { max-width: 100%; border-radius: 0.75rem; margin: 1rem 0; display: block; }
+        .tiptap-editor img.ProseMirror-selectednode { outline: 2px solid #6366f1; border-radius: 0.75rem; }
         .tiptap-editor .is-editor-empty:first-child::before { content: attr(data-placeholder); float: left; color: #475569; pointer-events: none; height: 0; }
       `}</style>
 
@@ -612,7 +753,7 @@ export default function BlogEditorApp() {
 
           {/* ── 열 2: WYSIWYG 에디터 + FAQ ── */}
           <div className="flex-1 flex flex-col min-h-0 border-r border-white/5">
-            <EditorToolbar editor={editor} />
+            <EditorToolbar editor={editor} onImageOpen={() => setImageModalOpen(true)} />
             <div className="flex-1 overflow-y-auto bg-slate-950">
               <EditorContent editor={editor} />
             </div>
@@ -741,6 +882,17 @@ export default function BlogEditorApp() {
 
         </div>
       </div>
+
+      {/* 이미지 생성 모달 */}
+      {imageModalOpen && (
+        <ImageGenModal
+          onClose={() => setImageModalOpen(false)}
+          onInsert={(src, alt) => {
+            editor?.chain().focus().setImage({ src, alt }).run();
+            setImageModalOpen(false);
+          }}
+        />
+      )}
 
       {/* 메타 인풋 공통 스타일 */}
       <style>{`

@@ -10,21 +10,23 @@ import {
 } from '@react-pdf/renderer';
 import { AnalysisResult, MarketingReport } from '../types';
 
-// ─── 폰트 등록 (Noto Sans KR — 한글 지원) ─────────────────────────
-// @react-pdf/renderer는 woff2 미지원 — TTF 사용
+// ─── 폰트 등록 — Pretendard (jsDelivr CDN, 버전 고정, TTF) ───────
+// Google Fonts v27 URL은 deprecated → Pretendard로 교체
+// https://github.com/orioncactus/pretendard
+const FONT_BASE = 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/static/alternative/TrueType';
+
 Font.register({
   family: 'NotoSansKR',
   fonts: [
-    {
-      src: 'https://fonts.gstatic.com/s/notosanskr/v27/P6xVpS3yc-9S6nyW27z9-v7W762-dw.ttf',
-      fontWeight: 400,
-    },
-    {
-      src: 'https://fonts.gstatic.com/s/notosanskr/v27/P6xWpS3yc-9S6nyW27z9-v7W762-dw.ttf',
-      fontWeight: 700,
-    },
+    { src: `${FONT_BASE}/Pretendard-Regular.ttf`,   fontWeight: 400 },
+    { src: `${FONT_BASE}/Pretendard-Medium.ttf`,    fontWeight: 500 },
+    { src: `${FONT_BASE}/Pretendard-SemiBold.ttf`,  fontWeight: 600 },
+    { src: `${FONT_BASE}/Pretendard-Bold.ttf`,      fontWeight: 700 },
+    { src: `${FONT_BASE}/Pretendard-ExtraBold.ttf`, fontWeight: 800 },
   ],
 });
+
+Font.registerHyphenationCallback(word => [word]);
 
 // ─── 공통 색상 ────────────────────────────────────────────────────
 const C = {

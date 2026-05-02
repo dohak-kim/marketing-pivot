@@ -19,6 +19,7 @@ const AegisApp     = lazy(() => import('@/apps/aegis/App'));
 const PathfinderApp = lazy(() => import('@/apps/cdj/App'));
 const SignalApp    = lazy(() => import('@/apps/cep/App'));
 const VideoApp     = lazy(() => import('@/apps/video/App'));
+const ForgeApp     = lazy(() => import('@/apps/forge/App'));
 
 // ── 네비게이션 설정 ───────────────────────────────────────────────────────
 const SITE_NAV = [
@@ -35,6 +36,7 @@ const TOOLS = [
   { path: '/tools/pathfinder',  label: 'AEGIS Pathfinder',        icon: '🗺️' },
   { path: '/tools/signal',      label: 'AEGIS Signal',            icon: '📊' },
   { path: '/tools/video',       label: 'AEGIS Vision',            icon: '🎬' },
+  { path: '/tools/forge',       label: 'AEGIS FORGE',             icon: '⚒️' },
 ];
 
 
@@ -168,6 +170,7 @@ function AppContent() {
             <Route path="/tools/pathfinder/*" element={<div className="pt-[5.5rem]"><PathfinderApp /></div>} />
             <Route path="/tools/signal/*"     element={<div className="pt-[5.5rem]"><SignalApp /></div>} />
             <Route path="/tools/video/*"      element={<div className="pt-[5.5rem]"><VideoApp /></div>} />
+            <Route path="/tools/forge/*"      element={<div className="pt-[5.5rem]"><ForgeApp /></div>} />
 
             {/* 어드민 (GlobalNav/Footer 없음) */}
             <Route path="/admin/blog" element={<BlogEditorApp />} />

@@ -16,20 +16,19 @@ interface SlidePDFProps {
   slides: Slide[];
 }
 
-/* 폰트 안정화 (TTF 포맷 사용) */
+/* 폰트 — Pretendard (jsDelivr CDN, 버전 고정 v1.3.9) */
+const FONT_BASE = 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/static/alternative/TrueType';
+
 Font.register({
   family: "NotoSans",
   fonts: [
-    {
-      src: "https://fonts.gstatic.com/s/notosanskr/v27/P6xVpS3yc-9S6nyW27z9-v7W762-dw.ttf",
-      fontWeight: 400,
-    },
-    {
-      src: "https://fonts.gstatic.com/s/notosanskr/v27/P6xWpS3yc-9S6nyW27z9-v7W762-dw.ttf",
-      fontWeight: 700,
-    }
-  ]
+    { src: `${FONT_BASE}/Pretendard-Regular.ttf`,  fontWeight: 400 },
+    { src: `${FONT_BASE}/Pretendard-SemiBold.ttf`, fontWeight: 600 },
+    { src: `${FONT_BASE}/Pretendard-Bold.ttf`,     fontWeight: 700 },
+  ],
 });
+
+Font.registerHyphenationCallback(word => [word]);
 
 /* A4 Landscape Layout */
 const styles = StyleSheet.create({

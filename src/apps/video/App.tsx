@@ -171,7 +171,7 @@ export default function VideoApp() {
 [BEST_FRAME_SEC: <seconds>]`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
+        model: 'gemini-2.0-flash',
         contents: [{ parts: [{ inlineData: { mimeType: file.type, data: base64String } }, { text: prompt }] }],
       });
 
@@ -188,10 +188,25 @@ export default function VideoApp() {
     } finally { setIsAnalyzing(false); }
   };
 
-  const downloadPDF = () => {
+  const downloadPDF = async () => {
     const el = document.getElementById('report-container');
     if (!el) return;
-    html2pdf().set({ margin: 0, filename: 'AEGIS_AEO_GEO_Report.pdf', image: { type: 'jpeg', quality: 1.0 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }, pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } }).from(el).save();
+    try {
+      await html2pdf()
+        .set({
+          margin: [8, 8, 8, 8],
+          filename: `AEGIS_Vision_Report_${new Date().toISOString().slice(0,10)}.pdf`,
+          image: { type: 'jpeg', quality: 0.95 },
+          html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: false },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', '.no-break'] },
+        })
+        .from(el)
+        .save();
+    } catch (e) {
+      alert('PDF 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+      console.error(e);
+    }
   };
 
   const Modal = ({ id, title, children }: { id: string; title: string; children: React.ReactNode }) => {

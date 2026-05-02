@@ -15,6 +15,7 @@ export const APPS = {
   cdj:         { color: '#F59E0B', label: 'AEGIS Pathfinder',  icon: '🗺️', desc: 'CDJ 고객 구매여정 분석' },
   cep:         { color: '#8B5CF6', label: 'AEGIS Signal',      icon: '📊', desc: 'CEP 트렌드·페르소나 분석' },
   video:       { color: '#EF4444', label: 'AEGIS Vision',      icon: '🎬', desc: '멀티모달 AEO/GEO 영상 분석' },
+  forge:       { color: '#F97316', label: 'AEGIS FORGE',       icon: '⚒️', desc: 'AI 크리에이티브 제작 스튜디오' },
 } as const;
 
 export type AppKey = keyof typeof APPS;
