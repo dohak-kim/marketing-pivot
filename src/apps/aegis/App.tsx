@@ -1,7 +1,12 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Context, RawDataItem, BattleFieldInput, BrandPresence, StrategyType, CognitionKey } from './core/context';
-import { suggestContexts, fetchAndClassifyRawData, RetrievalDensity, generateExecutionPlan, generateTemporalInsights } from './ai/gemini';
+import {
+  suggestContexts, fetchAndClassifyRawData, RetrievalDensity,
+  generateExecutionPlan, generateTemporalInsights,
+  generateLadderSummary, generateHeatmapSummary, generateNetworkSummary,
+  type VizSummary,
+} from './ai/gemini';
 import ContextList from './components/ContextList';
 import ContextModal from './components/ContextModal';
 import { StrategicDashboard, SortField, SortOrder } from './components/StrategicDashboard';
@@ -29,6 +34,7 @@ import { AnalysisPeriod } from './core/search/analysisPeriod.types';
 import { DateRange } from './core/search/config';
 import { saveSnapshot, loadSnapshots, ContextSnapshot } from './core/analysis/snapshotStorage';
 import CDJLadderView from './components/CDJLadderView';
+import VizSummaryPanel from './components/VizSummaryPanel';
 import { generateSeedKeywords } from './ai/gemini';
 import { collectSerpData, countBrandMentions, getEnvPipelineConfig, hasRealApiConfig } from './services/dataCollection/pipeline';
 import type { SerpApiPayload } from './services/dataCollection/types';
@@ -70,7 +76,9 @@ const AppContent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const [vizMode, setVizMode] = useState<'ladder' | 'heatmap' | 'network'>('ladder');
-  
+  const [vizSummaries, setVizSummaries] = useState<Record<string, VizSummary | null>>({});
+  const [vizSummaryLoading, setVizSummaryLoading] = useState<Record<string, boolean>>({});
+
   const [sortField, setSortField] = useState<SortField>('finalPriorityScore');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
@@ -116,6 +124,40 @@ const AppContent: React.FC = () => {
       html.classList.remove('dark');
     }
   }, [isDarkMode]);
+
+  // ── Viz AI 요약: 탭 전환 or contexts 변경 시 해당 탭 요약 자동 생성 ──────────
+  useEffect(() => {
+    if (!contexts.length || !lastDiscoveryValue) return;
+    // 이미 생성됐거나 로딩 중이면 스킵
+    if (vizSummaries[vizMode] || vizSummaryLoading[vizMode]) return;
+
+    const generate = async () => {
+      setVizSummaryLoading(prev => ({ ...prev, [vizMode]: true }));
+      try {
+        let summary: VizSummary;
+        if (vizMode === 'ladder') {
+          summary = await generateLadderSummary(contexts, lastDiscoveryValue);
+        } else if (vizMode === 'heatmap') {
+          summary = await generateHeatmapSummary(contexts, lastDiscoveryValue);
+        } else {
+          summary = await generateNetworkSummary(contexts, lastDiscoveryValue);
+        }
+        setVizSummaries(prev => ({ ...prev, [vizMode]: summary }));
+      } catch (e) {
+        console.error('[VizSummary]', e);
+      } finally {
+        setVizSummaryLoading(prev => ({ ...prev, [vizMode]: false }));
+      }
+    };
+    generate();
+  // contexts 길이가 바뀌면 캐시 초기화 후 재생성
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vizMode, contexts.length, lastDiscoveryValue]);
+
+  // contexts 내용이 완전히 바뀌면 summary 캐시 초기화
+  useEffect(() => {
+    setVizSummaries({});
+  }, [lastDiscoveryValue]);
 
   // Filter Contexts based on Active Tab AND Strategy Type
   const filteredContexts = useMemo(() => {
@@ -637,6 +679,27 @@ const AppContent: React.FC = () => {
     setShowSnapshotModal(false);
   };
 
+  const handleRefreshVizSummary = async () => {
+    if (!contexts.length || !lastDiscoveryValue) return;
+    setVizSummaries(prev => ({ ...prev, [vizMode]: null }));
+    setVizSummaryLoading(prev => ({ ...prev, [vizMode]: true }));
+    try {
+      let summary: VizSummary;
+      if (vizMode === 'ladder') {
+        summary = await generateLadderSummary(contexts, lastDiscoveryValue);
+      } else if (vizMode === 'heatmap') {
+        summary = await generateHeatmapSummary(contexts, lastDiscoveryValue);
+      } else {
+        summary = await generateNetworkSummary(contexts, lastDiscoveryValue);
+      }
+      setVizSummaries(prev => ({ ...prev, [vizMode]: summary }));
+    } catch (e) {
+      console.error('[VizSummary refresh]', e);
+    } finally {
+      setVizSummaryLoading(prev => ({ ...prev, [vizMode]: false }));
+    }
+  };
+
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -1044,30 +1107,54 @@ const AppContent: React.FC = () => {
 
                           {/* ── C³ Journey Ladder ── */}
                           {vizMode === 'ladder' && (
-                            <ErrorBoundary>
-                              <CDJLadderView
-                                contexts={contexts}
-                                category={lastDiscoveryValue}
-                                onSelectContext={setSelectedContext}
+                            <>
+                              <VizSummaryPanel
+                                summary={vizSummaries['ladder'] ?? null}
+                                isLoading={!!vizSummaryLoading['ladder']}
+                                onRefresh={handleRefreshVizSummary}
+                                accentColor="indigo"
                               />
-                            </ErrorBoundary>
+                              <ErrorBoundary>
+                                <CDJLadderView
+                                  contexts={contexts}
+                                  category={lastDiscoveryValue}
+                                  onSelectContext={setSelectedContext}
+                                />
+                              </ErrorBoundary>
+                            </>
                           )}
 
                           {/* ── Strategic Heatmap (Context × Cognition Matrix) ── */}
                           {vizMode === 'heatmap' && (
-                            <ErrorBoundary>
-                              <ContextCognitionMatrix ceps={contexts} />
-                            </ErrorBoundary>
+                            <>
+                              <VizSummaryPanel
+                                summary={vizSummaries['heatmap'] ?? null}
+                                isLoading={!!vizSummaryLoading['heatmap']}
+                                onRefresh={handleRefreshVizSummary}
+                                accentColor="violet"
+                              />
+                              <ErrorBoundary>
+                                <ContextCognitionMatrix ceps={contexts} />
+                              </ErrorBoundary>
+                            </>
                           )}
 
                           {/* ── Similarity Network ── */}
                           {vizMode === 'network' && (
-                            <ErrorBoundary>
-                              <ContextForceGraph
-                                ceps={contexts}
-                                onNodeClick={(id) => setSelectedContext(contexts.find(c => c.id === id) || null)}
+                            <>
+                              <VizSummaryPanel
+                                summary={vizSummaries['network'] ?? null}
+                                isLoading={!!vizSummaryLoading['network']}
+                                onRefresh={handleRefreshVizSummary}
+                                accentColor="emerald"
                               />
-                            </ErrorBoundary>
+                              <ErrorBoundary>
+                                <ContextForceGraph
+                                  ceps={contexts}
+                                  onNodeClick={(id) => setSelectedContext(contexts.find(c => c.id === id) || null)}
+                                />
+                              </ErrorBoundary>
+                            </>
                           )}
 
                           {/* ── PDF Print Portal (3 visualizations stacked) ── */}

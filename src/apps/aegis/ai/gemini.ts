@@ -831,3 +831,192 @@ JSON 배열로만 출력하세요: ["키워드1", "키워드2", ...]`,
     return Array.isArray(result) ? result.slice(0, count) : [category];
   });
 }
+
+// ── Viz AI 요약 공통 타입 ──────────────────────────────────────────────────
+export interface VizSummary {
+  headline: string;    // 한 줄 핵심 인사이트
+  insights: string[];  // 구체적 발견 3개
+  action: string;      // 즉시 실행 가능한 권장 액션
+}
+
+const VIZ_SUMMARY_SCHEMA = {
+  type: Type.OBJECT,
+  properties: {
+    headline:  { type: Type.STRING },
+    insights:  { type: Type.ARRAY, items: { type: Type.STRING } },
+    action:    { type: Type.STRING },
+  },
+  required: ['headline', 'insights', 'action'],
+};
+
+// ── Journey Ladder 요약 ───────────────────────────────────────────────────
+export async function generateLadderSummary(
+  contexts: Context[],
+  category: string,
+): Promise<VizSummary> {
+  const stageCounts: Record<string, number> = {
+    awareness: 0, consideration: 0, decision: 0, post_purchase: 0,
+  };
+  contexts.forEach(c => {
+    const s = c.cdjStage ?? c.cognitionVector?.dominant_cognition ?? '';
+    if (s in stageCounts) stageCounts[s as keyof typeof stageCounts]++;
+  });
+  const topByStage = Object.entries(stageCounts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([stage, count]) => `${stage}: ${count}개`).join(', ');
+  const topSignals = contexts
+    .sort((a, b) => (b.finalPriorityScore ?? 0) - (a.finalPriorityScore ?? 0))
+    .slice(0, 5)
+    .map(c => c.situation).join(' / ');
+
+  const ai = new GoogleGenAI({ apiKey: resolveApiKey() });
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-flash-preview',
+    contents: `당신은 디지털 마케팅 전략 컨설턴트입니다. "${category}" 카테고리의 C³ Journey Ladder 분석 결과를 비전문가도 이해할 수 있도록 해석해 주세요.
+
+[단계별 시그널 분포]
+${topByStage}
+(전체 ${contexts.length}개 시그널)
+
+[우선순위 상위 시그널]
+${topSignals}
+
+[해석 기준]
+- Awareness(인지): 아직 제품/서비스를 모르는 사람들의 탐색
+- Consideration(고려): 비교·정보 수집 단계의 검색
+- Decision(결정): 구매 직전 최종 확인 단계
+- Post-Purchase(구매후): 기존 사용자의 심화 탐색
+
+분석 요청:
+1. headline: 이 데이터가 보여주는 가장 중요한 마케팅 기회를 한 문장으로 (예: "고려 단계 시그널이 부재 — 비교 콘텐츠로 리드 전환 기회 존재")
+2. insights: 3가지 구체적 발견 (각 40자 이내, 숫자 포함 권장)
+3. action: 지금 당장 실행할 수 있는 가장 중요한 한 가지 마케팅 액션
+
+모든 내용은 한국어로 작성하세요.`,
+    config: {
+      temperature: 0.3,
+      responseMimeType: 'application/json',
+      responseSchema: VIZ_SUMMARY_SCHEMA,
+    },
+  });
+  return safeJsonParse<VizSummary>(response.text) ?? {
+    headline: '데이터 해석 중 오류가 발생했습니다.',
+    insights: [],
+    action: '',
+  };
+}
+
+// ── Strategic Heatmap 요약 ────────────────────────────────────────────────
+export async function generateHeatmapSummary(
+  contexts: Context[],
+  category: string,
+): Promise<VizSummary> {
+  const cognitionCounts: Record<CognitionKey, number> = {
+    informational: 0, exploratory: 0, commercial: 0, transactional: 0,
+  };
+  const strategyCounts: Record<string, number> = {};
+  contexts.forEach(c => {
+    const cog = (c.hybridCognition ?? c.cognition ?? 'informational') as CognitionKey;
+    if (cog in cognitionCounts) cognitionCounts[cog]++;
+    const st = c.strategyType ?? 'monitor';
+    strategyCounts[st] = (strategyCounts[st] ?? 0) + 1;
+  });
+  const highPriority = contexts
+    .filter(c => (c.finalPriorityScore ?? 0) >= 70)
+    .sort((a, b) => (b.finalPriorityScore ?? 0) - (a.finalPriorityScore ?? 0))
+    .slice(0, 4)
+    .map(c => `${c.situation}(점수:${Math.round(c.finalPriorityScore ?? 0)})`).join(', ');
+
+  const ai = new GoogleGenAI({ apiKey: resolveApiKey() });
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-flash-preview',
+    contents: `당신은 디지털 마케팅 전략 컨설턴트입니다. "${category}" 카테고리의 Strategic Heatmap 분석 결과를 해석해 주세요.
+
+[인지 유형별 분포 (Cognition × Context)]
+- 정보 탐색(Informational): ${cognitionCounts.informational}개
+- 탐색적(Exploratory): ${cognitionCounts.exploratory}개
+- 상업적(Commercial): ${cognitionCounts.commercial}개
+- 전환(Transactional): ${cognitionCounts.transactional}개
+
+[전략 유형별 분포]
+${Object.entries(strategyCounts).map(([k, v]) => `${k}: ${v}개`).join(', ')}
+
+[최우선 시그널 (점수 70+ 이상)]
+${highPriority || '없음'}
+
+분석 요청:
+1. headline: 히트맵이 보여주는 가장 뜨거운 전략 기회를 한 문장으로
+2. insights: 3가지 구체적 발견 (인지 유형 분포, 전략 집중점, 놓친 기회)
+3. action: 히트맵 기반 최우선 콘텐츠 전략 한 가지
+
+모든 내용은 한국어로 작성하세요.`,
+    config: {
+      temperature: 0.3,
+      responseMimeType: 'application/json',
+      responseSchema: VIZ_SUMMARY_SCHEMA,
+    },
+  });
+  return safeJsonParse<VizSummary>(response.text) ?? {
+    headline: '데이터 해석 중 오류가 발생했습니다.',
+    insights: [],
+    action: '',
+  };
+}
+
+// ── Similarity Network 요약 ───────────────────────────────────────────────
+export async function generateNetworkSummary(
+  contexts: Context[],
+  category: string,
+): Promise<VizSummary> {
+  const groups: Record<string, Context[]> = {};
+  contexts.forEach(c => {
+    const g = c.queryGroup ?? '미분류';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(c);
+  });
+  const clusterSummary = Object.entries(groups)
+    .sort((a, b) => b[1].length - a[1].length)
+    .slice(0, 6)
+    .map(([g, cs]) => `"${g}"(${cs.length}개)`)
+    .join(', ');
+  const isolated = contexts.filter(c => !c.queryGroup || c.queryGroup === '기타').length;
+  const brandDense = contexts
+    .filter(c => (c.brandPresence?.length ?? 0) >= 2)
+    .slice(0, 3)
+    .map(c => c.situation).join(', ');
+
+  const ai = new GoogleGenAI({ apiKey: resolveApiKey() });
+  const response = await ai.models.generateContent({
+    model: 'gemini-3-flash-preview',
+    contents: `당신은 디지털 마케팅 전략 컨설턴트입니다. "${category}" 카테고리의 Similarity Network 분석 결과를 해석해 주세요.
+
+[클러스터 구성 (상위 6개)]
+${clusterSummary || '클러스터 없음'}
+(전체 ${contexts.length}개 중 독립/미분류: ${isolated}개)
+
+[브랜드 존재감이 높은 시그널]
+${brandDense || '없음'}
+
+[해석 기준]
+- 큰 클러스터: 시장이 집중된 전쟁터 → 차별화 필요
+- 작은 고립 노드: 아직 경쟁이 적은 블루오션 기회
+- 브랜드 밀집 구간: 이미 경쟁이 치열한 영역
+
+분석 요청:
+1. headline: 네트워크 구조가 보여주는 경쟁 지형의 핵심을 한 문장으로
+2. insights: 3가지 구체적 발견 (최대 클러스터 의미, 블루오션 기회, 브랜드 전략)
+3. action: 네트워크 기반 포지셔닝 전략 한 가지
+
+모든 내용은 한국어로 작성하세요.`,
+    config: {
+      temperature: 0.3,
+      responseMimeType: 'application/json',
+      responseSchema: VIZ_SUMMARY_SCHEMA,
+    },
+  });
+  return safeJsonParse<VizSummary>(response.text) ?? {
+    headline: '데이터 해석 중 오류가 발생했습니다.',
+    insights: [],
+    action: '',
+  };
+}
