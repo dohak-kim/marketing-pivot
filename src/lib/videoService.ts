@@ -89,7 +89,7 @@ export async function generateReelStoryboards(adMessage: string): Promise<ReelSt
   };
 
   const response = await getAi().models.generateContent({
-    model: 'gemini-2.0-flash',
+    model: 'gemini-3-flash-preview',
     contents: `
 당신은 숏폼 비디오(Reels/Shorts) 전문 기획자입니다.
 광고 메시지 "${adMessage}"를 기반으로 15초 분량의 스토리보드 3개를 기획하세요.
