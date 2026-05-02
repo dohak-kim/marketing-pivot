@@ -50,7 +50,7 @@ function GlobalNav() {
         <div className="max-w-7xl mx-auto px-6 flex items-center h-14 gap-8">
           {/* 로고 */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            <img src="/logo-aegis-full.png" alt="Project AEGIS" className="h-7 w-auto object-contain" />
+            <img src="/logo-aegis-full.png" alt="Project AEGIS" className="h-7 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
           </Link>
 
           {/* 사이트 메뉴 */}
@@ -119,7 +119,7 @@ function Footer() {
     <footer className="bg-slate-950 border-t border-white/5 py-12">
       <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <img src="/logo-aegis-icon.png" alt="Project AEGIS" className="h-8 w-auto object-contain opacity-80" />
+          <img src="/logo-aegis-icon.png" alt="Project AEGIS" className="h-8 w-auto object-contain opacity-70" style={{ filter: 'brightness(0) invert(1)' }} />
           <div>
             <span className="text-sm font-black text-white">Marketing<span className="text-indigo-400">·</span>Pivot</span>
             <p className="text-xs text-slate-500 mt-0.5">From Classic to Drastic · Project AEGIS</p>

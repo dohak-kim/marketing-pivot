@@ -64,7 +64,7 @@ function PasswordGate({ onAuth }: { onAuth: () => void }) {
     <div className="min-h-screen bg-slate-950 flex items-center justify-center">
       <div className="bg-slate-900 border border-white/10 rounded-2xl p-8 w-80 space-y-4 shadow-2xl">
         <div className="text-center">
-          <img src="/logo-aegis-icon.png" alt="Project AEGIS" className="h-14 w-auto object-contain mx-auto mb-3" />
+          <img src="/logo-aegis-icon.png" alt="Project AEGIS" className="h-14 w-auto object-contain mx-auto mb-3" style={{ filter: 'brightness(0) invert(1)' }} />
           <h1 className="text-white font-black text-base">Blog Admin</h1>
           <p className="text-slate-500 text-xs mt-1">Marketing Pivot · Project AEGIS</p>
         </div>
@@ -173,7 +173,7 @@ export default function BlogEditorApp() {
       {/* 상단 툴바 */}
       <div className="shrink-0 border-b border-white/5 bg-slate-900 px-5 py-2.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <img src="/logo-aegis-icon.png" alt="AEGIS" className="h-6 w-auto object-contain" />
+          <img src="/logo-aegis-icon.png" alt="AEGIS" className="h-6 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
           <span className="text-sm font-black text-white">Blog Admin</span>
           {savedAt && (
             <span className="text-[10px] text-slate-600">자동저장 {savedAt}</span>

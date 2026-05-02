@@ -24,7 +24,8 @@ const Hero = () => (
 
     <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
       <img src="/logo-aegis-full.png" alt="Project AEGIS"
-        className="h-12 md:h-16 w-auto object-contain mx-auto mb-8 opacity-90" />
+        className="h-12 md:h-16 w-auto object-contain mx-auto mb-8 opacity-90"
+        style={{ filter: 'brightness(0) invert(1)' }} />
       <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight leading-none mb-6">
         Marketing<br />
         <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-blue-400">Pivot</span>
