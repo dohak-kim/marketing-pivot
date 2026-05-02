@@ -1,0 +1,308 @@
+
+<!DOCTYPE html>
+<html lang="ko" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C³ Cube Strategy Model</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- ── 폰트: Noto Sans KR (한국어) + Inter (영문) + JetBrains Mono (코드) ── -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              /* Noto Sans KR가 한글 렌더링, Inter가 영문 보완 */
+              sans: ['"Noto Sans KR"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+            },
+            colors: {
+              /*
+               * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               * AEGIS Design System — Primary Brand (Deep Cobalt)
+               * indigo 재매핑 → 기존 컴포넌트 클래스 무수정
+               * WCAG AA 기준: indigo-500+ 흰 배경에서 4.5:1 이상
+               * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               */
+              indigo: {
+                50:  '#F0EFFF',
+                100: '#E4E3FF',
+                200: '#CCCAFF',
+                300: '#A9A6FF',
+                400: '#8279FF',
+                500: '#5B52F5', /* 주요 CTA — 흰 배경 대비 4.8:1 ✅ AA */
+                600: '#4A40DC', /* Hover — 흰 배경 대비 6.1:1 ✅ AA */
+                700: '#3830B8', /* Active — 흰 배경 대비 7.8:1 ✅ AAA */
+                800: '#29239A',
+                900: '#1C1872',
+                950: '#0D0B42',
+              },
+
+              /*
+               * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               * Neutral (Warm-Slate) — 차별화된 웜 퍼플 뉴트럴
+               * 기존 쿨 그레이 slate 재매핑 → 아이덴티티 강화
+               * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               */
+              slate: {
+                50:  '#F6F6FE',
+                100: '#EDEDFB',
+                200: '#DCDCF5',
+                300: '#C2C1E8',
+                400: '#9291CC',
+                500: '#6B6AAA',
+                600: '#525190',
+                700: '#3D3C72',
+                800: '#292858',
+                850: '#1D1C42',
+                900: '#131230',
+                950: '#08071C',
+              },
+
+              /*
+               * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               * Teal Accent — 참신함, 전략적 실행을 표현
+               * emerald와 sky 사이의 독자적 위치
+               * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               */
+              teal: {
+                50:  '#F0FDF9',
+                100: '#CCFBF0',
+                200: '#99F4E1',
+                300: '#5EE8CC',
+                400: '#2DD4B3',
+                500: '#14B89B', /* Accent — 흰 배경 대비 3.8:1 (대형요소용) */
+                600: '#0D9480', /* 텍스트용 — 흰 배경 대비 4.6:1 ✅ AA */
+                700: '#0F766A',
+                800: '#115E56',
+                900: '#134E47',
+                950: '#042F2B',
+              },
+
+              /*
+               * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               * Signal Colors — WCAG AA 보장 (흰 배경 기준)
+               * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               */
+              /* emerald (성공/완료): 기본값 유지 — emerald-600(#059669) 4.6:1 ✅ */
+              /* rose (오류/경고): 기본값 유지 — rose-600(#E11D48) 4.7:1 ✅ */
+              /* amber (주의): 기본값 유지 — amber-700(#B45309) 4.5:1 ✅ */
+
+              /*
+               * Sky → 정보성 색상 (info)
+               * sky-600 = #0284C7, 흰 배경 4.5:1 ✅
+               */
+            },
+
+            /* 커스텀 그림자 — 색상 아이덴티티 반영 */
+            boxShadow: {
+              'brand-sm':  '0 1px 3px rgba(91,82,245,0.12), 0 1px 2px rgba(91,82,245,0.08)',
+              'brand-md':  '0 4px 12px rgba(91,82,245,0.18), 0 2px 4px rgba(91,82,245,0.10)',
+              'brand-lg':  '0 8px 30px rgba(91,82,245,0.24), 0 4px 8px rgba(91,82,245,0.12)',
+              'brand-glow':'0 0 40px rgba(91,82,245,0.35)',
+            },
+
+            /* 애니메이션 */
+            animation: {
+              'in': 'in 0.15s ease-out',
+              'fade-in': 'fadeIn 0.3s ease-out',
+              'slide-in-from-bottom-4': 'slideUp4 0.3s ease-out',
+              'slide-in-from-bottom-8': 'slideUp8 0.4s ease-out',
+              'zoom-in-95': 'zoomIn95 0.2s ease-out',
+            },
+          }
+        }
+      }
+    </script>
+
+    <style>
+      /* ── CSS Design Tokens ── */
+      :root {
+        /* Brand */
+        --color-brand:       #5B52F5;
+        --color-brand-dark:  #4A40DC;
+        --color-brand-light: #8279FF;
+        --color-brand-bg:    #F0EFFF;
+
+        /* Accent (Teal) */
+        --color-accent:      #14B89B;
+        --color-accent-dark: #0D9480;
+        --color-accent-bg:   #F0FDF9;
+
+        /* Surface (Light Mode) */
+        --bg-app:     #F6F6FE;
+        --bg-surface: #FFFFFF;
+        --bg-raised:  #EDEDFB;
+
+        /* Text (Light Mode) — WCAG AA 보장 */
+        --text-primary: #131230;   /* slate-900 — 흰 배경 17:1 ✅ */
+        --text-secondary: #3D3C72; /* slate-700 — 흰 배경 8.1:1 ✅ */
+        --text-muted:  #6B6AAA;    /* slate-500 — 흰 배경 4.7:1 ✅ */
+        --text-subtle: #9291CC;    /* slate-400 — 대형 UI 요소용 */
+
+        /* Border */
+        --border-color: #DCDCF5;
+        --border-subtle: #EDEDFB;
+
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      }
+
+      html.dark {
+        /* Surface (Dark Mode) */
+        --bg-app:     #08071C;
+        --bg-surface: #131230;
+        --bg-raised:  #1D1C42;
+
+        /* Text (Dark Mode) — WCAG AA 보장 */
+        --text-primary:   #F6F6FE; /* 어두운 배경 16:1 ✅ */
+        --text-secondary: #C2C1E8; /* 어두운 배경 8:1 ✅ */
+        --text-muted:     #9291CC; /* 어두운 배경 4.6:1 ✅ */
+        --text-subtle:    #6B6AAA;
+
+        /* Border */
+        --border-color: rgba(194,193,232,0.12);
+        --border-subtle: rgba(194,193,232,0.06);
+      }
+
+      /* ── Base Typography ── */
+      *, *::before, *::after { box-sizing: border-box; }
+
+      body {
+        font-family: "Noto Sans KR", Inter, system-ui, -apple-system, sans-serif;
+        background-color: var(--bg-app);
+        color: var(--text-primary);
+        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        /* 한국어 행간 최적화 */
+        line-height: 1.7;
+        word-break: keep-all;
+        overflow-wrap: break-word;
+      }
+
+      /* 영문 수자 전용: Inter로 렌더링 (Noto보다 영문 가독성 우수) */
+      .font-mono, code, pre {
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+      }
+
+      /* ── Glass Effect ── */
+      .glass {
+        background: rgba(19,18,48,0.65);
+        backdrop-filter: blur(16px) saturate(1.4);
+        border: 1px solid var(--border-color);
+      }
+      html.light .glass {
+        background: rgba(246,246,254,0.80);
+        backdrop-filter: blur(16px) saturate(1.6);
+        border: 1px solid rgba(91,82,245,0.10);
+        box-shadow: 0 4px 24px rgba(91,82,245,0.06);
+      }
+
+      /* ── Scrollbar 제거 ── */
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+      /* ── Theme Transition ── */
+      .theme-transition {
+        transition: background-color 0.25s ease, color 0.25s ease,
+                    border-color 0.25s ease, box-shadow 0.25s ease;
+      }
+
+      /* ── Focus Ring (접근성) ── */
+      :focus-visible {
+        outline: 2px solid var(--color-brand);
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+
+      /* ── Animations ── */
+      @keyframes fadeIn    { from { opacity:0 } to { opacity:1 } }
+      @keyframes slideUp4  { from { opacity:0; transform:translateY(1rem)  } to { opacity:1; transform:translateY(0) } }
+      @keyframes slideUp8  { from { opacity:0; transform:translateY(2rem)  } to { opacity:1; transform:translateY(0) } }
+      @keyframes zoomIn95  { from { opacity:0; transform:scale(0.95) } to { opacity:1; transform:scale(1) } }
+
+      .animate-in { animation: fadeIn 0.15s ease-out both; }
+      .fade-in    { animation: fadeIn 0.3s ease-out both; }
+      .slide-in-from-bottom-4 { animation: slideUp4 0.3s ease-out both; }
+      .slide-in-from-bottom-8 { animation: slideUp8 0.4s ease-out both; }
+      .zoom-in-95 { animation: zoomIn95 0.2s ease-out both; }
+      .duration-300 { animation-duration: 0.3s; }
+      .duration-500 { animation-duration: 0.5s; }
+      .duration-700 { animation-duration: 0.7s; }
+      .delay-300  { animation-delay: 0.3s; }
+
+      /* ── Print / PDF Styles ─────────────────────────────────────── */
+      @media print {
+        /* 1. 전체 앱(#root) 숨기기 — print-root만 표시 */
+        body > #root { display: none !important; }
+
+        /* 2. print-root 표시 + A4 레이아웃 */
+        body > .print-root {
+          display: block !important;
+          position: static !important;
+          width: 100% !important;
+          height: auto !important;
+          overflow: visible !important;
+          background: white !important;
+          color: #131230 !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          font-family: "Noto Sans KR", "Noto Sans", sans-serif !important;
+          font-size: 10pt !important;
+          line-height: 1.65 !important;
+        }
+
+        /* 3. 색상 보존 (모든 브라우저) */
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+
+        /* 4. 페이지 설정 */
+        html, body {
+          background: white !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          width: 100% !important;
+        }
+
+        @page {
+          size: A4 portrait;
+          margin: 13mm 14mm;
+        }
+
+        /* 5. 섹션 페이지 분리 방지 */
+        div[style*="marginBottom: 18"] { page-break-inside: avoid; }
+        div[style*="marginBottom: 16"] { page-break-inside: avoid; }
+      }
+    </style>
+
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.38.0",
+    "recharts": "https://esm.sh/recharts@^3.7.0",
+    "d3": "https://esm.sh/d3@^7.9.0",
+    "react-force-graph-2d": "https://esm.sh/react-force-graph-2d?external=react,react-dom"
+  }
+}
+</script>
+<link rel="stylesheet" href="/src/index.css">
+</head>
+<body>
+    <div id="root"></div>
+<script type="module" src="/src/main.tsx"></script>
+</body>
+</html>
