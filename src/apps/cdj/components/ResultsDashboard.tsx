@@ -1,5 +1,6 @@
 
 import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import type { AnalysisResult } from '../types';
@@ -26,6 +27,15 @@ interface ResultsDashboardProps {
 }
 
 export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, inputParams }) => {
+  const navigate = useNavigate();
+
+  const handleGoToC3 = () => {
+    sessionStorage.setItem('cdj_to_c3', JSON.stringify({
+      category: inputParams.topic,
+      brandName: '',
+    }));
+    navigate('/tools/c3');
+  };
   const dashboardRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isPrintMode, setIsPrintMode] = useState(false);
@@ -188,7 +198,17 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, inpu
             <span className={`text-sm font-medium ${isPrintMode ? 'text-brand-gold' : 'text-gray-400'}`}>인쇄용 (White)</span>
         </div>
 
-        <button 
+        <button
+          onClick={handleGoToC3}
+          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-md transition-colors border border-indigo-500 w-full sm:w-auto justify-center font-bold text-sm"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          C³에서 전략 수립
+        </button>
+
+        <button
           onClick={handleDownloadPDF}
           disabled={isDownloading}
           className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-gray-500 w-full sm:w-auto justify-center"

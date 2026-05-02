@@ -6,7 +6,7 @@ import {
 } from '@/lib/videoService';
 import { generateBlogImage, type ImageStyleConfig } from '@/lib/imageService';
 
-type Tab = 'reels' | 'adimage' | 'blogimage';
+type Tab = 'reels' | 'adimage' | 'blogimage' | 'aeoblog';
 
 interface ForgeContext {
   source: 'c3';
@@ -502,11 +502,214 @@ function BlogImageCreator() {
   );
 }
 
+// ── 탭 4: AEO 블로그 초안 ────────────────────────────────────────────────
+import { GoogleGenAI } from '@google/genai';
+
+function resolveApiKey(): string {
+  const sources = [
+    () => (process.env as any).GEMINI_API_KEY,
+    () => (process.env as any).API_KEY,
+    () => (import.meta as any)?.env?.VITE_API_KEY,
+  ];
+  for (const get of sources) {
+    try { const v = get(); if (v && v !== 'undefined') return String(v).trim(); } catch {}
+  }
+  return '';
+}
+const getForgeAi = () => new GoogleGenAI({ apiKey: resolveApiKey() });
+
+const AEO_CATEGORIES = ['AEO 인사이트', 'CDJ 전략', 'C³ Cube', 'GEO 전략', '마케팅 인사이트'] as const;
+
+interface AeoBlogDraft {
+  title: string;
+  introduction: string;
+  sections: { heading: string; body: string }[];
+  conclusion: string;
+}
+
+interface AeoBlogCreatorProps { injectedKeyword?: string; injectedContext?: string; }
+
+function AeoBlogCreator({ injectedKeyword, injectedContext }: AeoBlogCreatorProps) {
+  const [keyword,  setKeyword]  = useState(injectedKeyword ?? '');
+  const [context,  setContext]  = useState(injectedContext ?? '');
+  const [category, setCategory] = useState<string>(AEO_CATEGORIES[0]);
+  const [draft,    setDraft]    = useState<AeoBlogDraft | null>(null);
+  const [loading,  setLoading]  = useState(false);
+  const [error,    setError]    = useState<string | null>(null);
+  const [sent,     setSent]     = useState(false);
+
+  useEffect(() => {
+    if (injectedKeyword) setKeyword(injectedKeyword);
+    if (injectedContext) setContext(injectedContext);
+  }, [injectedKeyword, injectedContext]);
+
+  const generate = async () => {
+    if (!keyword.trim()) { setError('키워드를 입력해주세요.'); return; }
+    setLoading(true); setError(null); setDraft(null); setSent(false);
+    try {
+      const prompt = `
+당신은 AEO(Answer Engine Optimization) 전문 블로그 작가입니다.
+다음 키워드와 컨텍스트를 바탕으로 AI 검색(ChatGPT·Gemini·Perplexity)에서 직접 인용될 수 있는
+고품질 한국어 블로그 포스트 초안을 작성하십시오.
+
+키워드: "${keyword}"
+카테고리: "${category}"
+${context ? `추가 컨텍스트: ${context}` : ''}
+
+요구사항:
+- 제목: 질문형 또는 숫자 포함 ("...하는 5가지 방법" 등), 60자 이내
+- 도입부: 독자 pain point 공감 + 이 글에서 얻을 것 명시 (200자 내외)
+- 본문 섹션: H2 소제목 4~6개, 각 섹션 300자 이상의 구체적 내용
+- 결론: 핵심 요약 + CTA (150자 내외)
+- 모든 텍스트는 한국어로 작성
+
+JSON 형식으로 반환하시오.`;
+
+      const response = await getForgeAi().models.generateContent({
+        model: 'gemini-3-flash-preview',
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'object' as any,
+            properties: {
+              title:        { type: 'string' },
+              introduction: { type: 'string' },
+              sections: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    heading: { type: 'string' },
+                    body:    { type: 'string' },
+                  },
+                  required: ['heading', 'body'],
+                },
+              },
+              conclusion: { type: 'string' },
+            },
+            required: ['title', 'introduction', 'sections', 'conclusion'],
+          },
+          temperature: 0.7,
+        },
+      });
+      setDraft(JSON.parse(response.text ?? '{}'));
+    } catch (e: any) { setError(e.message); }
+    finally { setLoading(false); }
+  };
+
+  const sendToBlogEditor = () => {
+    if (!draft) return;
+    const html = [
+      `<p>${draft.introduction.replace(/\n/g, '</p><p>')}</p>`,
+      ...draft.sections.map(s => `<h2>${s.heading}</h2><p>${s.body.replace(/\n/g, '</p><p>')}</p>`),
+      `<h2>결론</h2><p>${draft.conclusion.replace(/\n/g, '</p><p>')}</p>`,
+    ].join('');
+    sessionStorage.setItem('signal_to_blog', JSON.stringify({
+      title: draft.title,
+      content: html,
+      tags: keyword ? [keyword] : [],
+      excerpt: draft.introduction.slice(0, 160),
+    }));
+    setSent(true);
+    setTimeout(() => { window.location.href = '/admin/blog'; }, 600);
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* 입력 패널 */}
+      <div className="bg-slate-900 border border-white/5 rounded-2xl p-6 space-y-4">
+        <h2 className="text-sm font-black text-white flex items-center gap-2">
+          <span className="w-5 h-5 rounded-full bg-emerald-600 flex items-center justify-center text-[10px] font-black">✦</span>
+          AEO 블로그 초안 생성
+        </h2>
+
+        <div>
+          <label className="forge-label">핵심 키워드 *</label>
+          <input value={keyword} onChange={e => setKeyword(e.target.value)}
+            placeholder="예: AI 검색 최적화, CEP 마케팅 전략"
+            className="forge-input" />
+        </div>
+
+        <div>
+          <label className="forge-label">카테고리</label>
+          <div className="flex flex-wrap gap-2">
+            {AEO_CATEGORIES.map(c => (
+              <button key={c} onClick={() => setCategory(c)}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-colors ${category === c ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-slate-800 border-white/5 text-slate-400 hover:text-white'}`}>
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="forge-label">추가 컨텍스트 (선택)</label>
+          <textarea value={context} onChange={e => setContext(e.target.value)}
+            rows={2} placeholder="C³ 전략 요약, 타겟 클러스터, 경쟁사 포지셔닝 등"
+            className="forge-input resize-none" />
+        </div>
+
+        {error && <ErrMsg msg={error} />}
+        <button onClick={generate} disabled={loading}
+          className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-black text-sm rounded-xl transition-colors flex items-center justify-center gap-2">
+          {loading ? <><Spinner />AEO 블로그 초안 생성 중...</> : '✦ AEO 블로그 초안 생성'}
+        </button>
+      </div>
+
+      {/* 미리보기 */}
+      {draft && (
+        <div className="bg-slate-900 border border-white/5 rounded-2xl p-6 space-y-5">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-black text-white truncate">{draft.title}</h3>
+            <button onClick={sendToBlogEditor} disabled={sent}
+              className="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-800 text-white font-black text-xs rounded-xl transition-colors">
+              {sent ? '✓ 이동 중...' : (
+                <>
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Blog Editor에서 편집
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="bg-slate-800/60 rounded-xl p-4 space-y-1">
+            <p className="text-[9px] font-black text-emerald-400 uppercase tracking-wider">도입부</p>
+            <p className="text-xs text-slate-300 leading-relaxed">{draft.introduction}</p>
+          </div>
+
+          <div className="space-y-3">
+            {draft.sections.map((s, i) => (
+              <div key={i} className="rounded-xl border border-white/5 overflow-hidden">
+                <div className="bg-slate-800/40 px-4 py-2 flex items-center gap-2">
+                  <span className="text-[8px] font-black text-emerald-400 uppercase tracking-wider">H2</span>
+                  <span className="text-xs font-bold text-white">{s.heading}</span>
+                </div>
+                <div className="px-4 py-3">
+                  <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-3">{s.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-slate-800/60 rounded-xl p-4 space-y-1">
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider">결론</p>
+            <p className="text-xs text-slate-300 leading-relaxed">{draft.conclusion}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── 메인 ──────────────────────────────────────────────────────────────────
 const TABS: { key: Tab; icon: string; label: string }[] = [
   { key: 'reels',    icon: '🎬', label: 'Reels 크리에이터' },
   { key: 'adimage',  icon: '🖼',  label: '광고 이미지' },
   { key: 'blogimage',icon: '📸', label: '블로그 이미지' },
+  { key: 'aeoblog',  icon: '✦',  label: 'AEO 블로그 초안' },
 ];
 
 export default function ForgeApp() {
@@ -575,6 +778,12 @@ export default function ForgeApp() {
           )}
           {tab === 'adimage'   && <AdImageCreator />}
           {tab === 'blogimage' && <BlogImageCreator />}
+          {tab === 'aeoblog'   && (
+            <AeoBlogCreator
+              injectedKeyword={forgeCtx?.situationSummary}
+              injectedContext={forgeCtx?.situationSummary}
+            />
+          )}
         </main>
       </div>
     </>

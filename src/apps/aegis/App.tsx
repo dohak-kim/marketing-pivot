@@ -76,6 +76,15 @@ const AppContent: React.FC = () => {
 
   const [battleInput, setBattleInput] = useState<BattleFieldInput | null>(null);
   const [lastDiscoveryValue, setLastDiscoveryValue] = useState('');
+  const [formPrefill, setFormPrefill] = useState<{ category: string; brandName: string } | null>(() => {
+    try {
+      const raw = sessionStorage.getItem('cdj_to_c3');
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      sessionStorage.removeItem('cdj_to_c3');
+      return data;
+    } catch { return null; }
+  });
   
   const [exportableData, setExportableData] = useState<RawDataItem[] | null>(null);
   const [isExportDataLoading, setIsExportDataLoading] = useState(false);
@@ -775,6 +784,8 @@ const AppContent: React.FC = () => {
                 isLoading={isLoading}
                 disabled={config.sources.length === 0}
                 onSubmit={handleDiscoverySuggest}
+                initialCategory={formPrefill?.category ?? ''}
+                initialBrandName={formPrefill?.brandName ?? ''}
              />
            </div>
         ) : (

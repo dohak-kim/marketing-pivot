@@ -7,15 +7,19 @@ interface BattleFieldFormProps {
   isLoading?: boolean;
   disabled?: boolean;
   onSubmit: (data: BattleFieldInput) => void;
+  initialCategory?: string;
+  initialBrandName?: string;
 }
 
 const BattleFieldForm: React.FC<BattleFieldFormProps> = ({
   isLoading = false,
   disabled = false,
   onSubmit,
+  initialCategory = '',
+  initialBrandName = '',
 }) => {
-  const [category, setCategory] = useState('');
-  const [brandName, setBrandName] = useState('');
+  const [category, setCategory] = useState(initialCategory);
+  const [brandName, setBrandName] = useState(initialBrandName);
   const [competitors, setCompetitors] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
