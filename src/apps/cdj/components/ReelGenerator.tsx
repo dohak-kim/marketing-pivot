@@ -179,6 +179,7 @@ export const ReelGenerator: React.FC<ReelGeneratorProps> = ({ adMessage }) => {
             useCORS: true,
             logging: false,
             backgroundColor: isPrintMode ? '#ffffff' : '#0F172A',
+            ignoreElements: (el) => el.classList.contains('hide-on-pdf'),
         });
 
         const imgData = canvas.toDataURL('image/png');

@@ -16,11 +16,11 @@ interface SlidePDFProps {
   slides: Slide[];
 }
 
-/* 폰트 — Pretendard (jsDelivr CDN, 버전 고정 v1.3.9) */
-const FONT_BASE = 'https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/static/alternative/TrueType';
+/* 폰트 — Pretendard (jsDelivr npm CDN, 버전 고정) */
+const FONT_BASE = 'https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/alternative/TrueType';
 
 Font.register({
-  family: "NotoSans",
+  family: 'NotoSansKR',
   fonts: [
     { src: `${FONT_BASE}/Pretendard-Regular.ttf`,  fontWeight: 400 },
     { src: `${FONT_BASE}/Pretendard-SemiBold.ttf`, fontWeight: 600 },
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     paddingLeft: 50,
     paddingRight: 50,
     backgroundColor: "#ffffff",
-    fontFamily: "NotoSans",
+    fontFamily: 'NotoSansKR',
     flexDirection: "column"
   },
   header: {

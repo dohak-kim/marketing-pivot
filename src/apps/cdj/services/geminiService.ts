@@ -410,7 +410,7 @@ export const generateVeoVideo = async (prompt: string): Promise<string> => {
     }
     
     // Create a NEW instance to ensure latest key is used if it was just selected
-    const veoAi = new GoogleGenAI({ apiKey: process.env.API_KEY || API_KEY });
+    const veoAi = new GoogleGenAI({ apiKey: resolveApiKey() });
 
     try {
         let operation = await veoAi.models.generateVideos({
@@ -435,7 +435,7 @@ export const generateVeoVideo = async (prompt: string): Promise<string> => {
         }
 
         // Fetch the actual video blob
-        const videoResponse = await fetch(`${videoUri}&key=${process.env.API_KEY || API_KEY}`);
+        const videoResponse = await fetch(`${videoUri}&key=${resolveApiKey()}`);
         if (!videoResponse.ok) {
             throw new Error(`Failed to download video: ${videoResponse.statusText}`);
         }

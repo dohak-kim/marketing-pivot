@@ -1,8 +1,23 @@
 // @react-pdf/renderer + PDFReport는 이 파일을 통해서만 import됨
 // → 클릭 시점(report 생성 완료 후)에만 동적 로드
 
-import { PDFDownloadLink } from '@react-pdf/renderer';
+import { PDFDownloadLink, Font } from '@react-pdf/renderer';
 import PDFReport from './PDFReport';
+
+// PDFReport.tsx와 동일한 폰트를 여기서도 등록 — lazy load 타이밍 문제 방지
+// Font.register는 멱등적(동일 family+src 중복 호출 안전)
+const FONT_BASE = 'https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/public/static/alternative/TrueType';
+Font.register({
+  family: 'NotoSansKR',
+  fonts: [
+    { src: `${FONT_BASE}/Pretendard-Regular.ttf`,   fontWeight: 400 },
+    { src: `${FONT_BASE}/Pretendard-Medium.ttf`,    fontWeight: 500 },
+    { src: `${FONT_BASE}/Pretendard-SemiBold.ttf`,  fontWeight: 600 },
+    { src: `${FONT_BASE}/Pretendard-Bold.ttf`,      fontWeight: 700 },
+    { src: `${FONT_BASE}/Pretendard-ExtraBold.ttf`, fontWeight: 800 },
+  ],
+});
+Font.registerHyphenationCallback(word => [word]);
 import { AnalysisResult, MarketingReport } from '../types';
 
 interface Props {
