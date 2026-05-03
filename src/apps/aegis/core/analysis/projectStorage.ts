@@ -73,13 +73,46 @@ export async function loadProjects(): Promise<AegisProject[]> {
     const store = tx.objectStore(STORE_NAME);
     const req   = store.getAll();
     req.onsuccess = () => {
-      const all = (req.result as AegisProject[]).sort(
-        (a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime()
-      );
+      const all = (req.result as AegisProject[])
+        .filter(p => p.id !== '__auto__')           // 자동 저장 항목 제외
+        .sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime());
       db.close();
       resolve(all);
     };
     req.onerror = () => { db.close(); reject(req.error); };
+  });
+}
+
+// ── 마지막 세션 자동 저장 / 불러오기 ──────────────────────────────────────
+export async function saveLastSession(
+  battleInput: BattleFieldInput,
+  contexts: Context[],
+): Promise<void> {
+  const db = await openDb();
+  await new Promise<void>((resolve, reject) => {
+    const tx    = db.transaction(STORE_NAME, 'readwrite');
+    const store = tx.objectStore(STORE_NAME);
+    store.put({
+      id: '__auto__',
+      name: `[자동] ${battleInput.category} 분석`,
+      battleInput,
+      contexts,
+      cepCount:  contexts.length,
+      savedAt:   new Date().toISOString(),
+    } satisfies AegisProject);
+    tx.oncomplete = () => { db.close(); resolve(); };
+    tx.onerror    = () => { db.close(); reject(tx.error); };
+  });
+}
+
+export async function loadLastSession(): Promise<AegisProject | null> {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx    = db.transaction(STORE_NAME, 'readonly');
+    const store = tx.objectStore(STORE_NAME);
+    const req   = store.get('__auto__');
+    req.onsuccess = () => { db.close(); resolve((req.result as AegisProject) ?? null); };
+    req.onerror   = () => { db.close(); reject(req.error); };
   });
 }
 

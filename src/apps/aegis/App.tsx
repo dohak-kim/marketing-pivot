@@ -33,7 +33,10 @@ import { TemporalComparison, TemporalInsight, buildTemporalComparison, getPeriod
 import { AnalysisPeriod } from './core/search/analysisPeriod.types';
 import { DateRange } from './core/search/config';
 import { saveSnapshot, loadSnapshots, ContextSnapshot } from './core/analysis/snapshotStorage';
-import { saveProject, loadProjects, deleteProject, formatProjectDate, AegisProject } from './core/analysis/projectStorage';
+import {
+  saveProject, loadProjects, deleteProject, formatProjectDate, AegisProject,
+  saveLastSession, loadLastSession,
+} from './core/analysis/projectStorage';
 import CDJLadderView from './components/CDJLadderView';
 import VizSummaryPanel from './components/VizSummaryPanel';
 import { generateSeedKeywords } from './ai/gemini';
@@ -121,6 +124,10 @@ const AppContent: React.FC = () => {
   const [savedProjects, setSavedProjects] = useState<AegisProject[]>([]);
   const [projectSaving, setProjectSaving] = useState(false);
 
+  // ── 마지막 세션 복원 배너 ────────────────────────────────────────────────
+  const [lastSession, setLastSession] = useState<AegisProject | null>(null);
+  const [restoreDismissed, setRestoreDismissed] = useState(false);
+
   // Export State
   const [showExportModal, setShowExportModal] = useState(false);
   const [sessionForgeOutputs, setSessionForgeOutputs] = useState<ForgeOutput[]>([]);
@@ -168,6 +175,22 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     setVizSummaries({});
   }, [lastDiscoveryValue]);
+
+  // ── 마운트 시 마지막 자동 저장 세션 로드 ──────────────────────────────
+  useEffect(() => {
+    loadLastSession().then(s => {
+      if (!s) return;
+      // 7일 이내 세션만 복원 제안
+      const age = Date.now() - new Date(s.savedAt).getTime();
+      if (age < 7 * 24 * 60 * 60 * 1000) setLastSession(s);
+    }).catch(() => {});
+  }, []);
+
+  // ── 분석 완료 시 자동 저장 (isLoading false 전환 후 contexts 존재) ─────
+  useEffect(() => {
+    if (isLoading || !battleInput || contexts.length === 0) return;
+    saveLastSession(battleInput, contexts).catch(() => {});
+  }, [isLoading]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filter Contexts based on Active Tab AND Strategy Type
   const filteredContexts = useMemo(() => {
@@ -887,6 +910,32 @@ const AppContent: React.FC = () => {
       <main className="max-w-7xl mx-auto px-6 py-10 flex-1 w-full relative">
         {!battleInput ? (
            <div className="flex flex-col items-center justify-center min-h-[80vh] animate-in fade-in duration-700">
+             {/* ── 마지막 세션 복원 배너 ── */}
+             {lastSession && !restoreDismissed && (
+               <div className="w-full max-w-5xl mb-4 animate-in fade-in slide-in-from-top-2 duration-500">
+                 <div className="flex items-center gap-3 px-5 py-3.5 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-700/50 rounded-2xl">
+                   <svg className="w-4 h-4 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                   </svg>
+                   <div className="flex-1 min-w-0">
+                     <span className="text-xs font-black text-indigo-700 dark:text-indigo-300">마지막 분석 세션</span>
+                     <span className="text-xs text-indigo-500 dark:text-indigo-400 ml-2">
+                       {lastSession.battleInput.category}
+                       {lastSession.battleInput.brandName && ` · ${lastSession.battleInput.brandName}`}
+                       {' · '}{lastSession.cepCount}개 CEP · {formatProjectDate(lastSession.savedAt)}
+                     </span>
+                   </div>
+                   <button
+                     onClick={() => { handleLoadProject(lastSession); setLastSession(null); }}
+                     className="shrink-0 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-black rounded-xl transition-colors"
+                   >복원</button>
+                   <button
+                     onClick={() => setRestoreDismissed(true)}
+                     className="shrink-0 text-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-300 transition-colors p-1"
+                   >✕</button>
+                 </div>
+               </div>
+             )}
              <BattleFieldForm
                 isLoading={isLoading}
                 disabled={config.sources.length === 0}
