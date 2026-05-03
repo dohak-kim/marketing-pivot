@@ -34,5 +34,40 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: { '@': path.resolve(__dirname, './src') },
     },
+    build: {
+      chunkSizeWarningLimit: 600,
+      rollupOptions: {
+        output: {
+          manualChunks(id: string) {
+            if (!id.includes('node_modules')) return undefined;
+
+            // React 코어 — 모든 앱 공유
+            if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/scheduler/')) {
+              return 'vendor-react';
+            }
+            // React Router — 모든 앱 공유
+            if (id.includes('react-router')) {
+              return 'vendor-router';
+            }
+            // Gemini SDK — AI 기능 있는 모든 앱 공유 (한 번만 다운로드)
+            if (id.includes('@google/genai')) {
+              return 'vendor-genai';
+            }
+            // 차트 라이브러리 — C³, AESA, Vision 3개 앱 공유
+            if (id.includes('chart.js') || id.includes('react-chartjs') || id.includes('/recharts/')) {
+              return 'vendor-charts';
+            }
+            // D3 + force graph — C³ 전용이나 큰 라이브러리(~160KB)라 별도 캐시 이점
+            if (id.includes('/d3-') || id.includes('/d3/') || id.includes('react-force-graph') || id.includes('force-graph')) {
+              return 'vendor-d3';
+            }
+            // @react-pdf/renderer — AESA 전용이나 2MB+ 라 별도 캐시 이점
+            if (id.includes('@react-pdf')) {
+              return 'vendor-react-pdf';
+            }
+          },
+        },
+      },
+    },
   };
 });
