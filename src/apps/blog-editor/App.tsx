@@ -121,20 +121,19 @@ function PasswordGate({ onAuth }: { onAuth: () => void }) {
     else { setErr(true); setTimeout(() => setErr(false), 1500); }
   };
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-      <div className="bg-slate-900 border border-white/10 rounded-2xl p-8 w-80 space-y-4 shadow-2xl">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="bg-white border border-gray-200 rounded-2xl p-8 w-80 space-y-4 shadow-lg">
         <div className="text-center">
           <img src="/logo-aegis-icon.png" alt="Project AEGIS"
-            className="h-14 w-auto object-contain mx-auto mb-3"
-            style={{ filter: 'brightness(0) invert(1)' }} />
-          <h1 className="text-white font-black text-base">Blog Admin</h1>
-          <p className="text-slate-500 text-xs mt-1">Marketing Pivot · Project AEGIS</p>
+            className="h-14 w-auto object-contain mx-auto mb-3" />
+          <h1 className="text-slate-900 font-black text-base">Blog Admin</h1>
+          <p className="text-slate-400 text-xs mt-1">Marketing Pivot · Project AEGIS</p>
         </div>
         <input type="password" value={pw}
           onChange={e => setPw(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && check()}
           placeholder="Password" autoFocus
-          className={`w-full bg-slate-800 border rounded-xl px-4 py-3 text-white text-sm focus:outline-none transition-colors ${err ? 'border-rose-500' : 'border-white/10 focus:border-indigo-500'}`} />
+          className={`w-full bg-gray-50 border rounded-xl px-4 py-3 text-slate-900 text-sm focus:outline-none transition-colors ${err ? 'border-rose-500' : 'border-gray-200 focus:border-indigo-500'}`} />
         <button onClick={check}
           className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl text-sm transition-colors">
           로그인
@@ -150,13 +149,13 @@ function ToolBtn({ active, onClick, title, children }: {
 }) {
   return (
     <button onClick={onClick} title={title}
-      className={`px-2 py-1 rounded text-xs font-bold transition-colors ${active ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white hover:bg-slate-700'}`}>
+      className={`px-2 py-1 rounded text-xs font-bold transition-colors ${active ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-900 hover:bg-gray-100'}`}>
       {children}
     </button>
   );
 }
 
-const SEP = () => <div className="w-px h-4 bg-white/10 mx-0.5 shrink-0" />;
+const SEP = () => <div className="w-px h-4 bg-gray-200 mx-0.5 shrink-0" />;
 
 // ── 이미지 생성 모달 ───────────────────────────────────────────────────────
 const IMAGE_TYPES:  ImageType[]  = ['Infographic', 'Illustration', 'Photography', 'Cartoon'];
@@ -191,14 +190,14 @@ function ImageGenModal({ onInsert, onClose }: {
 
   return (
     <div className="fixed inset-0 bg-black/70 z-[9999] flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden">
         {/* 헤더 */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <div>
-            <h2 className="text-sm font-black text-white">🖼 AI 이미지 생성</h2>
-            <p className="text-[10px] text-slate-500 mt-0.5">Gemini 2.5 Flash Image · 블로그 섹션용 16:9</p>
+            <h2 className="text-sm font-black text-slate-900">🖼 AI 이미지 생성</h2>
+            <p className="text-[10px] text-slate-400 mt-0.5">Gemini 2.5 Flash Image · 블로그 섹션용 16:9</p>
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-white text-xl transition-colors">✕</button>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-900 text-xl transition-colors">✕</button>
         </div>
 
         <div className="p-6 grid grid-cols-2 gap-5">
@@ -223,7 +222,7 @@ function ImageGenModal({ onInsert, onClose }: {
               <div className="grid grid-cols-2 gap-1.5">
                 {IMAGE_TYPES.map(t => (
                   <button key={t} onClick={() => setStyle(s => ({ ...s, type: t }))}
-                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-colors ${style.type === t ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-800 border-white/5 text-slate-400 hover:text-white'}`}>
+                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-colors ${style.type === t ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-gray-100 border-gray-200 text-slate-500 hover:text-slate-900'}`}>
                     {TYPE_KR[t]}
                   </button>
                 ))}
@@ -234,7 +233,7 @@ function ImageGenModal({ onInsert, onClose }: {
               <div className="grid grid-cols-2 gap-1.5">
                 {IMAGE_TONES.map(t => (
                   <button key={t} onClick={() => setStyle(s => ({ ...s, tone: t }))}
-                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-colors ${style.tone === t ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-800 border-white/5 text-slate-400 hover:text-white'}`}>
+                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-colors ${style.tone === t ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-gray-100 border-gray-200 text-slate-500 hover:text-slate-900'}`}>
                     {TONE_KR[t]}
                   </button>
                 ))}
@@ -245,7 +244,7 @@ function ImageGenModal({ onInsert, onClose }: {
               <div className="grid grid-cols-3 gap-1.5">
                 {IMAGE_COLORS.map(c => (
                   <button key={c} onClick={() => setStyle(s => ({ ...s, color: c }))}
-                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-colors ${style.color === c ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-slate-800 border-white/5 text-slate-400 hover:text-white'}`}>
+                    className={`px-2 py-1.5 rounded-lg text-[10px] font-bold border transition-colors ${style.color === c ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-gray-100 border-gray-200 text-slate-500 hover:text-slate-900'}`}>
                     {COLOR_KR[c]}
                   </button>
                 ))}
@@ -264,10 +263,10 @@ function ImageGenModal({ onInsert, onClose }: {
           {/* 오른쪽: 미리보기 */}
           <div className="flex flex-col gap-3">
             <label className="meta-label">미리보기</label>
-            <div className="flex-1 bg-slate-800 rounded-xl border border-white/5 flex items-center justify-center overflow-hidden aspect-video">
+            <div className="flex-1 bg-gray-100 rounded-xl border border-gray-200 flex items-center justify-center overflow-hidden aspect-video">
               {preview
                 ? <img src={preview} alt="Generated" className="w-full h-full object-cover rounded-xl" />
-                : <p className="text-[10px] text-slate-600 text-center px-4">이미지 생성 버튼을 클릭하면<br/>여기에 미리보기가 표시됩니다</p>
+                : <p className="text-[10px] text-slate-400 text-center px-4">이미지 생성 버튼을 클릭하면<br/>여기에 미리보기가 표시됩니다</p>
               }
             </div>
             {preview && (
@@ -278,7 +277,7 @@ function ImageGenModal({ onInsert, onClose }: {
             )}
             {preview && (
               <button onClick={generate} disabled={loading}
-                className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition-colors">
+                className="w-full py-2 bg-gray-100 hover:bg-gray-200 text-slate-600 text-xs font-bold rounded-xl transition-colors">
                 🔄 재생성
               </button>
             )}
@@ -320,7 +319,7 @@ function EditorToolbar({ editor, onImageOpen }: {
   const currentColor = editor.getAttributes('textStyle').color || '';
 
   return (
-    <div className="border-b border-white/5 bg-slate-800/60 shrink-0">
+    <div className="border-b border-gray-200 bg-gray-50 shrink-0">
       {/* ── 1행: 메인 서식 도구 ── */}
       <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5">
         {/* 문단 스타일 */}
@@ -331,7 +330,7 @@ function EditorToolbar({ editor, onImageOpen }: {
             if (v === '0') editor.chain().focus().setParagraph().run();
             else editor.chain().focus().setHeading({ level: parseInt(v) as 2|3 }).run();
           }}
-          className="bg-slate-700 border border-white/10 rounded px-2 py-1 text-xs text-white focus:outline-none">
+          className="bg-white border border-gray-200 rounded px-2 py-1 text-xs text-slate-700 focus:outline-none">
           <option value="0">본문</option>
           <option value="2">H2 소목차</option>
           <option value="3">H3 세부</option>
@@ -349,13 +348,13 @@ function EditorToolbar({ editor, onImageOpen }: {
         {/* 글자색 */}
         <div className="relative">
           <button onClick={() => setColorOpen(p => !p)} title="글자색"
-            className="flex items-center gap-1 px-2 py-1 rounded text-xs text-slate-300 hover:text-white hover:bg-slate-700 transition-colors">
-            <span className="font-bold" style={{ color: currentColor || '#f1f5f9', textShadow: currentColor ? 'none' : undefined }}>A</span>
-            <div className="w-3 h-1 rounded-sm mt-0.5" style={{ background: currentColor || '#f1f5f9' }} />
+            className="flex items-center gap-1 px-2 py-1 rounded text-xs text-slate-500 hover:text-slate-900 hover:bg-gray-100 transition-colors">
+            <span className="font-bold" style={{ color: currentColor || '#1e293b' }}>A</span>
+            <div className="w-3 h-1 rounded-sm mt-0.5" style={{ background: currentColor || '#1e293b' }} />
           </button>
           {colorOpen && (
-            <div className="absolute top-full left-0 mt-1 z-50 bg-slate-800 border border-white/10 rounded-xl p-2 shadow-2xl w-44">
-              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1.5 px-1">글자 색상</p>
+            <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-gray-200 rounded-xl p-2 shadow-lg w-44">
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 px-1">글자 색상</p>
               <div className="grid grid-cols-6 gap-1">
                 {COLOR_PALETTE.map(({ label, color }) => (
                   <button key={label} title={label}
@@ -410,8 +409,8 @@ function EditorToolbar({ editor, onImageOpen }: {
 
       {/* ── 2행: 표 편집 도구 (표 안에 커서 있을 때만 표시) ── */}
       {inTable && (
-        <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 border-t border-white/5 bg-teal-500/5">
-          <span className="text-[9px] font-black text-teal-400 uppercase tracking-widest mr-1">표 편집</span>
+        <div className="flex flex-wrap items-center gap-0.5 px-3 py-1.5 border-t border-gray-200 bg-teal-50">
+          <span className="text-[9px] font-black text-teal-600 uppercase tracking-widest mr-1">표 편집</span>
           <SEP />
           <ToolBtn active={false} onClick={() => editor.chain().focus().addRowBefore().run()} title="위에 행 추가">↑ 행추가</ToolBtn>
           <ToolBtn active={false} onClick={() => editor.chain().focus().addRowAfter().run()}  title="아래에 행 추가">↓ 행추가</ToolBtn>
@@ -447,12 +446,12 @@ function ChecklistPanel({ post }: { post: BlogPost }) {
       {/* 진행률 */}
       <div>
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[10px] font-bold text-slate-400">발행 전 체크리스트</span>
-          <span className={`text-[10px] font-black ${pct === 100 ? 'text-emerald-400' : pct >= 70 ? 'text-amber-400' : 'text-rose-400'}`}>
+          <span className="text-[10px] font-bold text-slate-500">발행 전 체크리스트</span>
+          <span className={`text-[10px] font-black ${pct === 100 ? 'text-emerald-600' : pct >= 70 ? 'text-amber-600' : 'text-rose-500'}`}>
             {passed}/{total} ({pct}%)
           </span>
         </div>
-        <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
           <div className={`h-full rounded-full transition-all ${pct === 100 ? 'bg-emerald-500' : pct >= 70 ? 'bg-amber-500' : 'bg-rose-500'}`}
             style={{ width: `${pct}%` }} />
         </div>
@@ -460,21 +459,21 @@ function ChecklistPanel({ post }: { post: BlogPost }) {
 
       {sections.map(sec => (
         <div key={sec}>
-          <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-2">{sec}</p>
+          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">{sec}</p>
           <div className="space-y-2">
             {CHECKLIST.filter(i => i.section === sec).map(item => {
               const ok = item.auto ? item.auto(post) : !!checked[item.id];
               return (
                 <div key={item.id}
                   onClick={() => !item.auto && toggle(item.id)}
-                  className={`flex items-start gap-2 p-2.5 rounded-lg border transition-all ${ok ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-white/5 bg-slate-900'} ${!item.auto ? 'cursor-pointer hover:border-white/10' : ''}`}>
-                  <span className={`text-sm shrink-0 mt-0.5 ${ok ? 'text-emerald-400' : 'text-slate-600'}`}>
+                  className={`flex items-start gap-2 p-2.5 rounded-lg border transition-all ${ok ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 bg-white'} ${!item.auto ? 'cursor-pointer hover:border-gray-300' : ''}`}>
+                  <span className={`text-sm shrink-0 mt-0.5 ${ok ? 'text-emerald-500' : 'text-slate-300'}`}>
                     {ok ? '✅' : '⬜'}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] text-slate-300 leading-relaxed break-keep">{item.label}</p>
+                    <p className="text-[10px] text-slate-600 leading-relaxed break-keep">{item.label}</p>
                     {item.auto && (
-                      <span className="text-[9px] text-slate-600">자동 감지</span>
+                      <span className="text-[9px] text-slate-400">자동 감지</span>
                     )}
                   </div>
                 </div>
@@ -514,7 +513,7 @@ export default function BlogEditorApp() {
       TableCell,
     ],
     editorProps: {
-      attributes: { class: 'tiptap-editor outline-none min-h-[400px] p-4 text-sm text-slate-200 leading-7' },
+      attributes: { class: 'tiptap-editor outline-none min-h-[400px] p-4 text-sm text-slate-700 leading-7' },
     },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
@@ -626,40 +625,40 @@ export default function BlogEditorApp() {
     <>
       {/* TipTap 에디터 스타일 */}
       <style>{`
-        .tiptap-editor h2 { font-size: 1.1rem; font-weight: 900; color: #f1f5f9; margin: 2rem 0 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
-        .tiptap-editor h3 { font-size: 0.95rem; font-weight: 800; color: #a5b4fc; margin: 1.25rem 0 0.5rem; }
-        .tiptap-editor p  { color: #cbd5e1; line-height: 1.8; margin-bottom: 0.75rem; }
-        .tiptap-editor strong { color: #f1f5f9; font-weight: 700; }
-        .tiptap-editor em { font-style: italic; color: #cbd5e1; }
+        .tiptap-editor h2 { font-size: 1.1rem; font-weight: 900; color: #1e293b; margin: 2rem 0 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; }
+        .tiptap-editor h3 { font-size: 0.95rem; font-weight: 800; color: #4338ca; margin: 1.25rem 0 0.5rem; }
+        .tiptap-editor p  { color: #475569; line-height: 1.8; margin-bottom: 0.75rem; }
+        .tiptap-editor strong { color: #1e293b; font-weight: 700; }
+        .tiptap-editor em { font-style: italic; color: #475569; }
         .tiptap-editor u  { text-decoration: underline; }
-        .tiptap-editor blockquote { border-left: 4px solid #6366f1; background: rgba(99,102,241,0.06); padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0 0.75rem 0.75rem 0; color: #cbd5e1; }
+        .tiptap-editor blockquote { border-left: 4px solid #6366f1; background: rgba(99,102,241,0.05); padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0 0.75rem 0.75rem 0; color: #475569; }
         .tiptap-editor ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; }
         .tiptap-editor ol { list-style: decimal; padding-left: 1.5rem; margin-bottom: 0.75rem; }
-        .tiptap-editor li { color: #cbd5e1; line-height: 1.7; margin-bottom: 0.25rem; }
-        .tiptap-editor a  { color: #818cf8; text-decoration: underline; }
-        .tiptap-editor code { background: #1e293b; color: #a5b4fc; padding: 0.1rem 0.4rem; border-radius: 0.25rem; font-size: 0.8rem; font-family: monospace; }
+        .tiptap-editor li { color: #475569; line-height: 1.7; margin-bottom: 0.25rem; }
+        .tiptap-editor a  { color: #4f46e5; text-decoration: underline; }
+        .tiptap-editor code { background: #f1f5f9; color: #4338ca; padding: 0.1rem 0.4rem; border-radius: 0.25rem; font-size: 0.8rem; font-family: monospace; border: 1px solid #e2e8f0; }
         .tiptap-editor table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-        .tiptap-editor th { background: rgba(255,255,255,0.05); padding: 0.5rem 0.75rem; text-align: left; font-size: 0.75rem; font-weight: 700; color: #94a3b8; border: 1px solid rgba(255,255,255,0.08); }
-        .tiptap-editor td { padding: 0.5rem 0.75rem; font-size: 0.75rem; color: #94a3b8; border: 1px solid rgba(255,255,255,0.06); }
-        .tiptap-editor hr { border-color: rgba(255,255,255,0.08); margin: 1.5rem 0; }
+        .tiptap-editor th { background: #f1f5f9; padding: 0.5rem 0.75rem; text-align: left; font-size: 0.75rem; font-weight: 700; color: #475569; border: 1px solid #e2e8f0; }
+        .tiptap-editor td { padding: 0.5rem 0.75rem; font-size: 0.75rem; color: #64748b; border: 1px solid #f1f5f9; }
+        .tiptap-editor hr { border-color: #e2e8f0; margin: 1.5rem 0; }
         .tiptap-editor img { max-width: 100%; border-radius: 0.75rem; margin: 1rem 0; display: block; }
         .tiptap-editor img.ProseMirror-selectednode { outline: 2px solid #6366f1; border-radius: 0.75rem; }
-        .tiptap-editor .is-editor-empty:first-child::before { content: attr(data-placeholder); float: left; color: #475569; pointer-events: none; height: 0; }
+        .tiptap-editor .is-editor-empty:first-child::before { content: attr(data-placeholder); float: left; color: #94a3b8; pointer-events: none; height: 0; }
       `}</style>
 
-      <div className="min-h-screen bg-slate-950 text-white font-sans flex flex-col" style={{ height: '100vh' }}>
+      <div className="min-h-screen bg-gray-50 text-slate-900 font-sans flex flex-col" style={{ height: '100vh' }}>
 
         {/* 상단 툴바 */}
-        <div className="shrink-0 border-b border-white/5 bg-slate-900 px-5 py-2.5 flex items-center justify-between">
+        <div className="shrink-0 border-b border-gray-200 bg-white px-5 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src="/logo-aegis-icon.png" alt="AEGIS" className="h-6 w-auto object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
-            <span className="text-sm font-black text-white">Blog Admin</span>
-            {savedAt && <span className="text-[10px] text-slate-600">자동저장 {savedAt}</span>}
+            <img src="/logo-aegis-icon.png" alt="AEGIS" className="h-6 w-auto object-contain" />
+            <span className="text-sm font-black text-slate-900">Blog Admin</span>
+            {savedAt && <span className="text-[10px] text-slate-400">자동저장 {savedAt}</span>}
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={newPost} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-lg transition-colors">새 글</button>
-            <button onClick={loadDraft} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-lg transition-colors">임시글 불러오기</button>
-            <button onClick={importJson} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-lg transition-colors">JSON 가져오기</button>
+            <button onClick={newPost} className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-slate-600 text-xs font-bold rounded-lg transition-colors">새 글</button>
+            <button onClick={loadDraft} className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-slate-600 text-xs font-bold rounded-lg transition-colors">임시글 불러오기</button>
+            <button onClick={importJson} className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-slate-600 text-xs font-bold rounded-lg transition-colors">JSON 가져오기</button>
             <button onClick={exportJson} className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-lg transition-colors">JSON 내보내기 ↓</button>
           </div>
         </div>
@@ -668,7 +667,7 @@ export default function BlogEditorApp() {
         <div className="flex flex-1 min-h-0">
 
           {/* ── 열 1: 메타 & SEO ── */}
-          <div className="w-64 shrink-0 border-r border-white/5 bg-slate-900/40 overflow-y-auto">
+          <div className="w-64 shrink-0 border-r border-gray-200 bg-white overflow-y-auto">
             <div className="p-4 space-y-3">
 
               {/* 섹션: 본문 구조 */}
@@ -774,108 +773,108 @@ export default function BlogEditorApp() {
           </div>
 
           {/* ── 열 2: WYSIWYG 에디터 + FAQ ── */}
-          <div className="flex-1 flex flex-col min-h-0 border-r border-white/5">
+          <div className="flex-1 flex flex-col min-h-0 border-r border-gray-200">
             <EditorToolbar editor={editor} onImageOpen={() => setImageModalOpen(true)} />
-            <div className="flex-1 overflow-y-auto bg-slate-950">
+            <div className="flex-1 overflow-y-auto bg-white">
               <EditorContent editor={editor} />
             </div>
 
             {/* FAQ 빌더 */}
-            <div className="shrink-0 border-t border-white/5 bg-slate-900/30 p-4">
+            <div className="shrink-0 border-t border-gray-200 bg-gray-50 p-4">
               <div className="flex items-center justify-between mb-2.5">
                 <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
-                  📌 FAQ <span className="text-slate-700 font-normal normal-case">FAQPage 스키마 자동 생성</span>
+                  📌 FAQ <span className="text-slate-400 font-normal normal-case">FAQPage 스키마 자동 생성</span>
                 </label>
-                <button onClick={addFaq} className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 transition-colors">+ 추가</button>
+                <button onClick={addFaq} className="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors">+ 추가</button>
               </div>
               <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
                 {post.faqs.map((faq, i) => (
-                  <div key={i} className="bg-slate-900 border border-white/5 rounded-xl p-3 space-y-2">
+                  <div key={i} className="bg-white border border-gray-200 rounded-xl p-3 space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-indigo-400 shrink-0">Q.</span>
+                      <span className="text-[10px] font-bold text-indigo-600 shrink-0">Q.</span>
                       <input value={faq.q} onChange={e => editFaq(i, 'q', e.target.value)}
                         placeholder="질문형 문장 권장"
-                        className="flex-1 bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-white focus:outline-none" />
-                      <button onClick={() => removeFaq(i)} className="text-slate-600 hover:text-rose-400 text-sm shrink-0">✕</button>
+                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-xs text-slate-800 focus:outline-none" />
+                      <button onClick={() => removeFaq(i)} className="text-slate-400 hover:text-rose-500 text-sm shrink-0">✕</button>
                     </div>
                     <div className="flex items-start gap-2">
-                      <span className="text-[10px] font-bold text-slate-600 shrink-0 mt-1">A.</span>
+                      <span className="text-[10px] font-bold text-slate-400 shrink-0 mt-1">A.</span>
                       <textarea value={faq.a} onChange={e => editFaq(i, 'a', e.target.value)}
                         rows={2} placeholder="명확하고 간결한 답변"
-                        className="flex-1 bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-slate-300 focus:outline-none resize-none" />
+                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-xs text-slate-600 focus:outline-none resize-none" />
                     </div>
                   </div>
                 ))}
-                {post.faqs.length === 0 && <p className="text-[10px] text-slate-700 text-center py-1">FAQ 추가 시 FAQPage 스키마 자동 생성</p>}
+                {post.faqs.length === 0 && <p className="text-[10px] text-slate-400 text-center py-1">FAQ 추가 시 FAQPage 스키마 자동 생성</p>}
               </div>
             </div>
 
             {/* HowTo 단계 빌더 */}
-            <div className="shrink-0 border-t border-white/5 bg-slate-900/20 p-4">
+            <div className="shrink-0 border-t border-gray-200 bg-gray-50 p-4">
               <div className="flex items-center justify-between mb-2.5">
                 <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
-                  🪜 HowTo 단계 <span className="text-slate-700 font-normal normal-case">HowTo 스키마 자동 생성</span>
+                  🪜 HowTo 단계 <span className="text-slate-400 font-normal normal-case">HowTo 스키마 자동 생성</span>
                 </label>
-                <button onClick={addStep} className="text-[10px] font-bold text-teal-400 hover:text-teal-300 transition-colors">+ 단계 추가</button>
+                <button onClick={addStep} className="text-[10px] font-bold text-teal-600 hover:text-teal-800 transition-colors">+ 단계 추가</button>
               </div>
               <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
                 {(post.howToSteps ?? []).map((step, i) => (
-                  <div key={i} className="bg-slate-900 border border-teal-500/10 rounded-xl p-3 space-y-2">
+                  <div key={i} className="bg-white border border-teal-200 rounded-xl p-3 space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black text-teal-400 shrink-0 w-5">{i + 1}.</span>
+                      <span className="text-[10px] font-black text-teal-600 shrink-0 w-5">{i + 1}.</span>
                       <input value={step.name} onChange={e => editStep(i, 'name', e.target.value)}
                         placeholder="단계 제목 (예: 키워드 리서치)"
-                        className="flex-1 bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-white focus:outline-none" />
-                      <button onClick={() => removeStep(i)} className="text-slate-600 hover:text-rose-400 text-sm shrink-0">✕</button>
+                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-xs text-slate-800 focus:outline-none" />
+                      <button onClick={() => removeStep(i)} className="text-slate-400 hover:text-rose-500 text-sm shrink-0">✕</button>
                     </div>
                     <textarea value={step.text} onChange={e => editStep(i, 'text', e.target.value)}
                       rows={2} placeholder="단계 설명"
-                      className="w-full bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-slate-300 focus:outline-none resize-none" />
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-xs text-slate-600 focus:outline-none resize-none" />
                   </div>
                 ))}
-                {!(post.howToSteps?.length) && <p className="text-[10px] text-slate-700 text-center py-1">단계 추가 시 HowTo 스키마 자동 생성 (AI 답변 최적화)</p>}
+                {!(post.howToSteps?.length) && <p className="text-[10px] text-slate-400 text-center py-1">단계 추가 시 HowTo 스키마 자동 생성 (AI 답변 최적화)</p>}
               </div>
             </div>
 
             {/* 핵심 인용구 빌더 */}
-            <div className="shrink-0 border-t border-white/5 bg-slate-900/20 p-4">
+            <div className="shrink-0 border-t border-gray-200 bg-gray-50 p-4">
               <div className="flex items-center justify-between mb-2.5">
                 <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
-                  " " 핵심 인용구 <span className="text-slate-700 font-normal normal-case">Quotation 스키마 자동 생성</span>
+                  " " 핵심 인용구 <span className="text-slate-400 font-normal normal-case">Quotation 스키마 자동 생성</span>
                 </label>
-                <button onClick={addQuote} className="text-[10px] font-bold text-amber-400 hover:text-amber-300 transition-colors">+ 인용 추가</button>
+                <button onClick={addQuote} className="text-[10px] font-bold text-amber-600 hover:text-amber-800 transition-colors">+ 인용 추가</button>
               </div>
               <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
                 {(post.quotes ?? []).map((q, i) => (
-                  <div key={i} className="bg-slate-900 border border-amber-500/10 rounded-xl p-3 space-y-2">
+                  <div key={i} className="bg-white border border-amber-200 rounded-xl p-3 space-y-2">
                     <div className="flex items-start gap-2">
-                      <span className="text-amber-400 text-sm shrink-0 mt-0.5">"</span>
+                      <span className="text-amber-500 text-sm shrink-0 mt-0.5">"</span>
                       <textarea value={q.text} onChange={e => editQuote(i, 'text', e.target.value)}
                         rows={2} placeholder="인용 문장 (통계, 전문가 코멘트 등)"
-                        className="flex-1 bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-white focus:outline-none resize-none" />
-                      <button onClick={() => removeQuote(i)} className="text-slate-600 hover:text-rose-400 text-sm shrink-0">✕</button>
+                        className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-xs text-slate-800 focus:outline-none resize-none" />
+                      <button onClick={() => removeQuote(i)} className="text-slate-400 hover:text-rose-500 text-sm shrink-0">✕</button>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <input value={q.author ?? ''} onChange={e => editQuote(i, 'author', e.target.value)}
                         placeholder="출처 저자/기관"
-                        className="bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-slate-300 focus:outline-none" />
+                        className="bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-xs text-slate-600 focus:outline-none" />
                       <input value={q.sourceUrl ?? ''} onChange={e => editQuote(i, 'sourceUrl', e.target.value)}
                         placeholder="출처 URL (선택)"
-                        className="bg-slate-800 border border-white/5 rounded-lg px-2 py-1 text-xs text-slate-300 focus:outline-none" />
+                        className="bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 text-xs text-slate-600 focus:outline-none" />
                     </div>
                   </div>
                 ))}
-                {!(post.quotes?.length) && <p className="text-[10px] text-slate-700 text-center py-1">인용 추가 시 Quotation 스키마 자동 생성</p>}
+                {!(post.quotes?.length) && <p className="text-[10px] text-slate-400 text-center py-1">인용 추가 시 Quotation 스키마 자동 생성</p>}
               </div>
             </div>
           </div>
 
           {/* ── 열 3: 스키마 / 체크리스트 ── */}
-          <div className="w-80 shrink-0 flex flex-col min-h-0">
-            <div className="shrink-0 border-b border-white/5 flex">
+          <div className="w-80 shrink-0 flex flex-col min-h-0 bg-white">
+            <div className="shrink-0 border-b border-gray-200 flex">
               {(['checklist', 'schema'] as const).map(tab => (
                 <button key={tab} onClick={() => setRightTab(tab)}
-                  className={`flex-1 py-2.5 text-[11px] font-bold transition-colors border-b-2 ${rightTab === tab ? 'text-white border-indigo-500' : 'text-slate-500 border-transparent hover:text-slate-300'}`}>
+                  className={`flex-1 py-2.5 text-[11px] font-bold transition-colors border-b-2 ${rightTab === tab ? 'text-slate-900 border-indigo-500' : 'text-slate-400 border-transparent hover:text-slate-700'}`}>
                   {tab === 'checklist' ? '✅ 발행 체크리스트' : '{ } JSON-LD 스키마'}
                 </button>
               ))}
@@ -886,11 +885,11 @@ export default function BlogEditorApp() {
                 : (
                   <div className="space-y-4">
                     {schemas.length === 0
-                      ? <p className="text-[10px] text-slate-700 text-center mt-10">글 정보를 입력하면 스키마가 생성됩니다.</p>
+                      ? <p className="text-[10px] text-slate-400 text-center mt-10">글 정보를 입력하면 스키마가 생성됩니다.</p>
                       : schemas.map((s, i) => (
                         <div key={i}>
-                          <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">{(s as any)['@type']}</p>
-                          <pre className="bg-slate-900 border border-white/5 rounded-xl p-3 text-[10px] text-emerald-400 font-mono overflow-x-auto whitespace-pre-wrap break-all">
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{(s as any)['@type']}</p>
+                          <pre className="bg-gray-50 border border-gray-200 rounded-xl p-3 text-[10px] text-emerald-700 font-mono overflow-x-auto whitespace-pre-wrap break-all">
                             {JSON.stringify(s, null, 2)}
                           </pre>
                         </div>
@@ -919,8 +918,8 @@ export default function BlogEditorApp() {
       {/* 메타 인풋 공통 스타일 */}
       <style>{`
         .meta-label { display: block; font-size: 9px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
-        .meta-input { width: 100%; background: #1e293b; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 6px 10px; font-size: 11px; color: #f1f5f9; outline: none; }
-        .meta-input:focus { border-color: #6366f1; }
+        .meta-input { width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px; font-size: 11px; color: #1e293b; outline: none; }
+        .meta-input:focus { border-color: #6366f1; background: #fff; }
       `}</style>
     </>
   );
