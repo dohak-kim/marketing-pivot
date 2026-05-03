@@ -16,6 +16,33 @@ function resolveApiKey(): string {
 
 const ai = new GoogleGenAI({ apiKey: resolveApiKey() });
 
+const CDJ_MODEL = 'gemini-2.5-flash-preview-05-14';
+
+/** CDJ용 시드 키워드 생성 — aegis의 gemini.ts와 독립적으로 동일 모델 사용 */
+export async function generateCdjSeeds(topic: string, count = 12): Promise<string[]> {
+  const response = await ai.models.generateContent({
+    model: CDJ_MODEL,
+    contents: `한국 검색 시장 기준으로 "${topic}" 주제를 검색할 때 실제로 사용하는 대표 키워드 ${count}개를 추출하세요.
+검색 의도(정보성/탐색성/상업성/전환성)가 고루 포함되도록 다양하게 선택하세요.
+실제 검색어처럼 작성하세요 (예: "1인 가구 인테리어 추천", "원룸 가구 배치 방법").
+JSON 배열로만 출력하세요: ["키워드1", "키워드2", ...]`,
+    config: {
+      temperature: 0.15,
+      responseMimeType: 'application/json',
+      responseSchema: {
+        type: Type.ARRAY,
+        items: { type: Type.STRING },
+      },
+    },
+  });
+  try {
+    const result = JSON.parse(response.text ?? '[]');
+    return Array.isArray(result) ? result.slice(0, count) : [topic];
+  } catch {
+    return [topic];
+  }
+}
+
 const responseSchema = {
     type: Type.OBJECT,
     properties: {

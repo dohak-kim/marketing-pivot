@@ -5,11 +5,10 @@ import { InputGuide } from './components/InputGuide';
 import { ResultsDashboard } from './components/ResultsDashboard';
 import { Loader } from './components/Loader';
 import { Modal } from './components/Modal';
-import { analyzeContent } from './services/geminiService';
+import { analyzeContent, generateCdjSeeds } from './services/geminiService';
 import type { AnalysisResult } from './types';
 import { SearchConfigProvider, useSearchConfig } from '@/apps/aegis/core/search/SearchConfigContext';
 import type { SearchConfig, SearchSource } from '@/apps/aegis/core/search/config';
-import { generateSeedKeywords } from '@/apps/aegis/ai/gemini';
 import {
   collectSerpData,
   getEnvPipelineConfig,
@@ -85,7 +84,7 @@ const CdjInner: React.FC = () => {
     try {
       // Step 1: 시드 키워드 생성
       setProgressMsg('🔍 키워드 시드 생성 중...');
-      const seeds = await generateSeedKeywords(topic, 12);
+      const seeds = await generateCdjSeeds(topic, 12);
 
       // Step 2: 실시간 SERP 데이터 수집 (API 키 있을 때만)
       let serpData: SerpApiPayload | null = null;
@@ -109,8 +108,10 @@ const CdjInner: React.FC = () => {
         dateRange: config.dateRange,
         serpData,
       }));
-    } catch {
-      setError('분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+    } catch (err) {
+      console.error('[Pathfinder] 분석 오류:', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.\n(${msg})`);
     } finally {
       setIsLoading(false);
       setProgressMsg('');
