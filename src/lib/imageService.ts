@@ -29,32 +29,24 @@ export async function generateBlogImage(
 ): Promise<string> {
   const ai = new GoogleGenAI({ apiKey: resolveApiKey() });
 
-  const prompt = `
-Create a professional ${style.type} for a digital marketing blog article.
-Theme: "${heading}" (translate the core concept of this Korean heading into a strong visual metaphor).
-Visual Style: ${style.tone} manner, ${style.color} color palette.
-Aspect ratio: 16:9, high resolution, 4K quality, professional composition.
+  const prompt = [
+    `Professional ${style.type} for a digital marketing blog article.`,
+    `Theme: translate the Korean concept "${heading}" into a strong visual metaphor.`,
+    `Style: ${style.tone}, ${style.color} color palette.`,
+    `Aspect ratio: 16:9. High resolution, premium editorial quality.`,
+    context ? `Context: ${context.substring(0, 200)}` : '',
+    `Rules: absolutely NO text, NO characters, NO words in the image.`,
+    `Prefer clean symbolic visuals over text-based infographics.`,
+  ].filter(Boolean).join('\n');
 
-Context: "${context.substring(0, 200)}"
-
-STRICT RULES:
-- NO Korean characters — they render broken.
-- If labels are needed, use ONLY simple English keywords (MAX 3 words).
-- Prefer a clean, text-free composition with strong symbolic visuals.
-- The image must feel premium and editorial.
-`;
-
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash-preview-05-14',
-    contents: { parts: [{ text: prompt }] },
-    config: { responseModalities: ['IMAGE', 'TEXT'] },
+  // Imagen 3: 전문 이미지 생성 모델, 텍스트 없는 고품질 비주얼에 최적
+  const response = await ai.models.generateImages({
+    model: 'imagen-3.0-generate-002',
+    prompt,
+    config: { numberOfImages: 1, aspectRatio: '16:9' },
   });
 
-  for (const part of response.candidates?.[0]?.content?.parts ?? []) {
-    if (part.inlineData?.data) {
-      return `data:image/png;base64,${part.inlineData.data}`;
-    }
-  }
-
-  throw new Error('이미지 데이터가 응답에 포함되지 않았습니다.');
+  const bytes = response.generatedImages?.[0]?.image?.imageBytes;
+  if (!bytes) throw new Error('이미지 데이터가 응답에 포함되지 않았습니다.');
+  return `data:image/jpeg;base64,${bytes}`;
 }

@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { generateAdImage } from '../services/geminiService';
 import type { AspectRatio, ImageTone } from '../types';
 import { GenerateIcon } from './icons/GenerateIcon';
+import { overlayText } from '@/lib/canvasTextOverlay';
 
 const aspectRatios: { value: AspectRatio; label: string }[] = [
   { value: '1:1', label: '정방형 (1:1)' },
@@ -103,14 +104,16 @@ export const AdImageGenerator: React.FC<AdImageGeneratorProps> = ({ adMessage, t
       const generatedBase64 = await generateAdImage({
         logoImage: logoPayload,
         productImage: productPayload,
-        adMessage: editableAdMessage, // 수정된 광고 문구 사용
+        adMessage: editableAdMessage,
         topic: topic,
         aspectRatio,
         tone: imageTone,
         textPosition,
         textColor,
       });
-      setGeneratedImageUrl(`data:image/png;base64,${generatedBase64}`);
+      // 배경 이미지 저장 (미리보기는 CSS 오버레이로 텍스트 표시 → 인터랙티브)
+      const mimeHint = generatedBase64.startsWith('/9j/') ? 'image/jpeg' : 'image/png';
+      setGeneratedImageUrl(`data:${mimeHint};base64,${generatedBase64}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
     } finally {
@@ -118,87 +121,26 @@ export const AdImageGenerator: React.FC<AdImageGeneratorProps> = ({ adMessage, t
     }
   };
   
-  const handleDownload = () => {
-    if (!generatedImageUrl || !previewContainerRef.current || !previewTextRef.current) return;
-
-    // 1. 실제 렌더링된 미리보기 요소들의 크기를 직접 측정합니다.
-    const computedStyle = window.getComputedStyle(previewTextRef.current);
-    const previewFontSizePx = parseFloat(computedStyle.fontSize);
-    const previewContainerWidth = previewContainerRef.current.offsetWidth;
-    const previewTextWidth = previewTextRef.current.offsetWidth;
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = generatedImageUrl;
-
-    img.onload = () => {
-        const targetWidth = 1080;
-        const targetHeight = aspectRatio === '1:1' ? 1080 : 1920;
-        canvas.width = targetWidth;
-        canvas.height = targetHeight;
-
-        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-
-        // 2. 미리보기 컨테이너와 최종 캔버스의 너비 비율을 계산합니다.
-        const scaleFactor = targetWidth / previewContainerWidth;
-        
-        // 3. 측정된 폰트 크기와 텍스트 너비에 스케일링 비율을 곱하여 최종 캔버스용 값을 계산합니다.
-        const fontSize = previewFontSizePx * scaleFactor;
-        const lineHeight = fontSize * 1.25; // Tailwind 'leading-tight'와 일치
-        const maxWidth = previewTextWidth * scaleFactor;
-
-        ctx.font = `700 ${fontSize}px "Noto Sans KR", sans-serif`;
-        ctx.fillStyle = textColor;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-        ctx.shadowBlur = 10;
-        ctx.shadowOffsetX = 3;
-        ctx.shadowOffsetY = 3;
-
-        const words = editableAdMessage.split(/\s+/);
-        let line = '';
-        const lines: string[] = [];
-
-        for (const word of words) {
-            const testLine = line ? `${line} ${word}` : word;
-            const metrics = ctx.measureText(testLine);
-            if (metrics.width > maxWidth && line) {
-                lines.push(line);
-                line = word;
-            } else {
-                line = testLine;
-            }
-        }
-        if (line) {
-            lines.push(line);
-        }
-
-        let startY;
-        if (textPosition === 'top') {
-            startY = targetHeight * 0.15;
-        } else if (textPosition === 'bottom') {
-            startY = targetHeight * 0.85 - (lines.length - 1) * lineHeight;
-        } else {
-            startY = targetHeight / 2 - ((lines.length - 1) * lineHeight) / 2;
-        }
-
-        let currentY = startY;
-        for (const line of lines) {
-            ctx.fillText(line, targetWidth / 2, currentY);
-            currentY += lineHeight;
-        }
-
-        const link = document.createElement('a');
-        link.download = `cdj-ad-image-${Date.now()}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-    };
+  const handleDownload = async () => {
+    if (!generatedImageUrl) return;
+    try {
+      // 배경 이미지에 한글 텍스트를 Canvas로 합성 → 다운로드
+      const withText = await overlayText(generatedImageUrl, {
+        text:     editableAdMessage,
+        position: textPosition,
+        color:    textColor,
+      });
+      const link = document.createElement('a');
+      link.download = `cdj-ad-image-${Date.now()}.png`;
+      link.href = withText;
+      link.click();
+    } catch {
+      // fallback: 배경만 다운로드
+      const link = document.createElement('a');
+      link.download = `cdj-ad-image-${Date.now()}.png`;
+      link.href = generatedImageUrl;
+      link.click();
+    }
   };
 
   const handleReset = () => {

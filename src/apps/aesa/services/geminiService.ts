@@ -364,23 +364,21 @@ export class GeminiService {
 
   async generatePersonaImage(personaDescription: string): Promise<string | undefined> {
     try {
-      const response = await this.generateContentWithRetry(
-        'gemini-2.5-flash-image',
-        {
-          contents: {
-            parts: [
-              { text: `Generate a high-quality, photorealistic professional portrait image representing the following target persona for a business marketing report: ${personaDescription.slice(0, 500)}. The image should be modern, realistic, and suitable for a strategy deck.` },
-            ],
-          },
-        }
-      );
+      const ai = new GoogleGenAI({ apiKey: resolveApiKey() });
+      // Imagen 3: 전문 인물 초상화에 최적화, Gemini 대비 품질 우수
+      const response = await ai.models.generateImages({
+        model: 'imagen-3.0-generate-002',
+        prompt: [
+          'Professional portrait photograph for a business marketing strategy deck.',
+          `Persona: ${personaDescription.slice(0, 450)}`,
+          'Style: photorealistic, natural lighting, neutral background, confident pose.',
+          'NO text, NO watermark, NO labels.',
+        ].join(' '),
+        config: { numberOfImages: 1, aspectRatio: '1:1' },
+      });
 
-      for (const part of response.candidates?.[0]?.content?.parts || []) {
-        if (part.inlineData) {
-          const base64EncodeString: string = part.inlineData.data;
-          return `data:image/png;base64,${base64EncodeString}`;
-        }
-      }
+      const bytes = response.generatedImages?.[0]?.image?.imageBytes;
+      if (bytes) return `data:image/jpeg;base64,${bytes}`;
     } catch (e) {
       console.error("Failed to generate persona image:", e);
     }

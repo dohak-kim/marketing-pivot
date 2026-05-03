@@ -130,7 +130,7 @@ export const analyzeContent = async ({ topic, sourceType, dateRange }: AnalysisP
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-2.5-flash-preview-05-14',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -252,7 +252,7 @@ export const generateAdImage = async ({
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: 'gemini-2.5-flash-preview-05-14',
       contents: contents,
       config: {
         imageConfig: {
@@ -325,7 +325,7 @@ export const generateReelStoryboards = async (adMessage: string): Promise<ReelSt
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-2.5-flash-preview-05-14',
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
@@ -374,7 +374,7 @@ export const generateSceneImage = async (description: string, assets: Storyboard
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
+      model: 'gemini-2.5-flash-preview-05-14',
       contents: { parts },
       config: {
         imageConfig: {

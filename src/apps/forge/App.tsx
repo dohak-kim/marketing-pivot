@@ -5,6 +5,7 @@ import {
   type ReelStoryboard, type StoryboardAsset, type AssetType, type AdImageParams,
 } from '@/lib/videoService';
 import { generateBlogImage, type ImageStyleConfig } from '@/lib/imageService';
+import { overlayText } from '@/lib/canvasTextOverlay';
 
 type Tab = 'reels' | 'adimage' | 'blogimage' | 'aeoblog';
 
@@ -287,7 +288,17 @@ function AdImageCreator() {
         ...(params as AdImageParams),
         logoImage: logo, productImage: product,
       });
-      setPreview(`data:image/png;base64,${base64}`);
+      // 배경 이미지에 한글 광고 카피를 Canvas로 합성
+      const mimeHint = base64.startsWith('/9j/') ? 'image/jpeg' : 'image/png';
+      const withText = await overlayText(
+        `data:${mimeHint};base64,${base64}`,
+        {
+          text:     params.adMessage!,
+          position: params.textPosition ?? 'bottom',
+          color:    params.textColor    ?? '#ffffff',
+        },
+      );
+      setPreview(withText);
     } catch (e: any) { setError(e.message); }
     finally { setLoading(false); }
   };

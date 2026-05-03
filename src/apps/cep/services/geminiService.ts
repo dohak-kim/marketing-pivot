@@ -332,29 +332,17 @@ export const generateSectionImage = async (heading: string, body: string, style:
   `;
 
   try {
+    // Imagen 3 — 순수 text-to-image, 참조 이미지 없음. 텍스트 없는 비주얼 품질 최우수
     const ai = getAi();
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
-      contents: { parts: [{ text: prompt }] },
-      config: {
-        imageConfig: {
-          aspectRatio: "16:9",
-        }
-      }
+    const response = await ai.models.generateImages({
+      model: 'imagen-3.0-generate-002',
+      prompt,
+      config: { numberOfImages: 1, aspectRatio: '16:9' },
     });
 
-    const candidate = response.candidates?.[0];
-    if (!candidate || !candidate.content || !candidate.content.parts) {
-      throw new Error("AI가 응답을 생성하지 못했습니다.");
-    }
-
-    for (const part of candidate.content.parts) {
-      if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
-      }
-    }
-
-    throw new Error("이미지 데이터가 응답에 포함되지 않았습니다.");
+    const bytes = response.generatedImages?.[0]?.image?.imageBytes;
+    if (!bytes) throw new Error("이미지 데이터가 응답에 포함되지 않았습니다.");
+    return `data:image/jpeg;base64,${bytes}`;
   } catch (e: any) {
     console.error("Image Generation Error:", e);
     throw new Error(e.message || "이미지 생성 중 오류가 발생했습니다.");

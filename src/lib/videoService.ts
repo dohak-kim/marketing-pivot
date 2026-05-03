@@ -165,44 +165,53 @@ export async function generateVeoVideo(prompt: string): Promise<string> {
   return URL.createObjectURL(blob);
 }
 
-// ── 광고 이미지 생성 ──────────────────────────────────────────────────────
+// ── 광고 이미지 생성 (배경만 생성 — 텍스트는 호출부에서 canvasTextOverlay로 합성) ──
+// 참조 이미지 없음 → Imagen 3 (고품질 text-to-image)
+// 참조 이미지 있음 → Gemini 2.5 Flash (멀티모달 필수)
+// 반환값: raw base64 문자열 (data: URI 접두사 없음)
 export async function generateAdImage(params: AdImageParams): Promise<string> {
   const { logoImage, productImage, adMessage, topic, aspectRatio, tone, textPosition, textColor } = params;
   const translatedTone = toneToEnglish(tone);
+  const hasRef = !!(logoImage || productImage);
+
+  const bgPrompt = [
+    `Expert graphic designer's social media ad background. DO NOT render any text, letters, or characters.`,
+    `Mood: "${adMessage}" — express visually, not literally.`,
+    `Style: ${translatedTone}.`,
+    `Composition: ${textPosition} area should be quieter (soft focus) for text overlay contrast with ${textColor}.`,
+    `Aspect ratio: ${aspectRatio}. Premium quality. No words anywhere.`,
+  ].join('\n');
+
+  if (!hasRef) {
+    // Imagen 3 — 참조 이미지 없을 때 최고 품질
+    const topicHint = topic ? `Category: ${topic}.` : '';
+    const response = await getAi().models.generateImages({
+      model: 'imagen-3.0-generate-002',
+      prompt: `${bgPrompt}\n${topicHint}`,
+      config: { numberOfImages: 1, aspectRatio },
+    });
+    const bytes = response.generatedImages?.[0]?.image?.imageBytes;
+    if (!bytes) throw new Error('광고 이미지 데이터가 응답에 없습니다.');
+    return bytes; // raw base64 (JPEG)
+  }
+
+  // Gemini 2.5 Flash — 로고·상품 참조 이미지 멀티모달 합성
   const imageParts: any[] = [];
   let coreVisualPrompt = '';
-
   if (productImage) {
     imageParts.push({ inlineData: { data: productImage.base64, mimeType: productImage.mimeType } });
-    coreVisualPrompt += 'A product image is provided — make it the central focus. ';
+    coreVisualPrompt += 'Product image provided — make it the central focus. ';
   }
   if (logoImage) {
     imageParts.push({ inlineData: { data: logoImage.base64, mimeType: logoImage.mimeType } });
     coreVisualPrompt += productImage
-      ? 'A brand logo is also provided — integrate it subtly (corner or watermark).'
-      : 'A brand logo is provided — create a thematic background matching the brand identity.';
-  }
-  if (imageParts.length === 0) {
-    coreVisualPrompt += `Create a high-quality advertising background for "${topic || 'General Marketing'}" themed around: "${adMessage}". Premium stock-photo quality, ready for text overlay.`;
+      ? 'Brand logo also provided — integrate subtly (corner or watermark).'
+      : 'Brand logo provided — create thematic background matching brand identity.';
   }
 
   const response = await getAi().models.generateContent({
     model: 'gemini-2.5-flash-preview-05-14',
-    contents: {
-      parts: [
-        ...imageParts,
-        { text: `
-You are an expert graphic designer creating a background image for a social media ad.
-DO NOT RENDER ANY TEXT.
-Theme: "${adMessage}" — capture its mood visually, not literally.
-Core visual: ${coreVisualPrompt}
-Style: ${translatedTone}
-Text will be placed in the ${textPosition} — keep that area naturally quieter (soft focus, less detail).
-Ensure good contrast for ${textColor} text in the ${textPosition}.
-Aspect ratio: ${aspectRatio}. No letters, characters, or words anywhere.
-` },
-      ],
-    },
+    contents: { parts: [...imageParts, { text: `${bgPrompt}\n${coreVisualPrompt}` }] },
     config: { imageConfig: { aspectRatio } },
   });
 
