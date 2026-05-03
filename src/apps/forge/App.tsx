@@ -9,7 +9,7 @@ import { generateBlogImage, type ImageStyleConfig } from '@/lib/imageService';
 type Tab = 'reels' | 'adimage' | 'blogimage' | 'aeoblog';
 
 interface ForgeContext {
-  source: 'c3';
+  source: 'c3' | 'vision';
   situationSummary: string;
   reels15s: string;
   shorts30s: string;
@@ -754,11 +754,13 @@ export default function ForgeApp() {
           </div>
         </div>
 
-        {/* C³ 전략 컨텍스트 배너 */}
+        {/* 컨텍스트 배너 (C³ / Vision) */}
         {forgeCtx && forgeCtx.situationSummary && (
-          <div className="bg-slate-900/80 border-b border-orange-500/20">
+          <div className={`border-b ${forgeCtx.source === 'vision' ? 'bg-rose-950/30 border-rose-500/20' : 'bg-slate-900/80 border-orange-500/20'}`}>
             <div className="max-w-6xl mx-auto px-6 py-2.5 flex items-center gap-2">
-              <span className="text-[8px] font-black text-orange-400 uppercase tracking-widest shrink-0">C³ 전략 컨텍스트</span>
+              <span className={`text-[8px] font-black uppercase tracking-widest shrink-0 ${forgeCtx.source === 'vision' ? 'text-rose-400' : 'text-orange-400'}`}>
+                {forgeCtx.source === 'vision' ? 'Vision 분석 컨텍스트' : 'C³ 전략 컨텍스트'}
+              </span>
               <p className="text-[10px] text-slate-400 truncate">{forgeCtx.situationSummary}</p>
               <button
                 onClick={() => setForgeCtx(null)}

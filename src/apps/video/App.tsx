@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AppHeader from '@/shared/components/AppHeader';
 import { UploadCloud, Video, AlertCircle, Loader2, CheckCircle2, ChevronRight, Download } from 'lucide-react';
 import { GoogleGenAI } from '@google/genai';
@@ -61,6 +62,7 @@ const PLATFORM_WEIGHTS: Record<string, { ocr: number; stt: number; context: numb
 };
 
 export default function VideoApp() {
+  const navigate = useNavigate();
   const [file, setFile]             = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [platform, setPlatform]     = useState(PLATFORMS[0]);
@@ -393,8 +395,26 @@ export default function VideoApp() {
                     <p className="text-sm animate-pulse">OCR & STT 신호 추출 중...</p>
                   </div>
                 ) : reportData && reportMarkdown ? (
-                  <div className="bg-white rounded-xl border border-slate-200 p-6 overflow-x-auto">
-                    <ReportLayout isPdf={false} />
+                  <div className="space-y-3">
+                    <div className="flex justify-end">
+                      <button
+                        onClick={() => {
+                          sessionStorage.setItem('forge_context', JSON.stringify({
+                            source: 'vision',
+                            situationSummary: `[${platform}] ${keyword} 영상 분석 — ${reportData.oneLineReview}\n개선 포인트: ${(reportData.actionItems as string[]).slice(0,3).join(' / ')}`,
+                            reels15s: '',
+                            shorts30s: '',
+                          }));
+                          navigate('/tools/forge');
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-2 bg-orange-500 hover:bg-orange-400 text-white text-xs font-black rounded-xl transition-colors"
+                      >
+                        <span>⚒️</span>FORGE Reels로 기획
+                      </button>
+                    </div>
+                    <div className="bg-white rounded-xl border border-slate-200 p-6 overflow-x-auto">
+                      <ReportLayout isPdf={false} />
+                    </div>
                   </div>
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center text-slate-300 space-y-3">
