@@ -1,5 +1,6 @@
 
 import React, { useState, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Context, StrategyType } from '../core/context';
 import { forgeOutputToMarkdown, copyToClipboard } from '../utils/export';
 import {
@@ -146,8 +147,28 @@ const MarkdownCopyButton: React.FC<{
   );
 };
 
+// ── 마크다운 → HTML 변환 (Blog Editor Tiptap 포맷) ───────────────────────
+function forgeContentToHtml(content: string): string {
+  const lines = content.split('\n');
+  const out: string[] = [];
+  let listBuf: string[] = [];
+  const flushList = () => { if (listBuf.length) { out.push(`<ul>${listBuf.map(i => `<li>${i}</li>`).join('')}</ul>`); listBuf = []; } };
+  for (const line of lines) {
+    if (line.startsWith('# '))   { flushList(); out.push(`<h1>${line.slice(2)}</h1>`); }
+    else if (line.startsWith('## '))  { flushList(); out.push(`<h2>${line.slice(3)}</h2>`); }
+    else if (line.startsWith('### ')) { flushList(); out.push(`<h3>${line.slice(4)}</h3>`); }
+    else if (line.startsWith('- ') || line.startsWith('• ')) { listBuf.push(line.slice(2)); }
+    else if (line.startsWith('---'))  { flushList(); out.push('<hr>'); }
+    else if (!line.trim())            { flushList(); }
+    else                              { flushList(); out.push(`<p>${line}</p>`); }
+  }
+  flushList();
+  return out.join('');
+}
+
 // ── Main Component ─────────────────────────────────────────────────────────
 const ForgeStudio: React.FC<ForgeStudioProps> = ({ context, strategyType, brandName, executionPlan, onOutputGenerated }) => {
+  const navigate = useNavigate();
   const recommendation = useMemo(() => getForgeRecommendation(context, strategyType), [context, strategyType]);
   const workflow = useMemo(() => buildForgeWorkflow(context, strategyType || 'brand_build', executionPlan), [context, strategyType, executionPlan]);
 
@@ -202,6 +223,22 @@ const ForgeStudio: React.FC<ForgeStudioProps> = ({ context, strategyType, brandN
   };
 
   const handleReforge = () => { setOutput(null); handleForge(); };
+
+  const [sentToBlog, setSentToBlog] = useState(false);
+  const handleSendToBlog = () => {
+    if (!output) return;
+    const raw = output.variants?.[activeVariant] ?? output.mainContent;
+    const firstH1 = raw.split('\n').find(l => l.startsWith('# '));
+    const title = firstH1 ? firstH1.slice(2).trim() : (context.marketSignal?.clusterName ?? 'FORGE 콘텐츠');
+    sessionStorage.setItem('signal_to_blog', JSON.stringify({
+      title,
+      content: forgeContentToHtml(raw),
+      tags: [context.marketSignal?.clusterName ?? ''].filter(Boolean),
+      excerpt: raw.replace(/^#+ .+\n?/gm, '').replace(/\n+/g, ' ').trim().slice(0, 160),
+    }));
+    setSentToBlog(true);
+    setTimeout(() => { navigate('/admin/blog'); }, 500);
+  };
 
   const meta = MEDIA_TYPE_META[mediaType];
   const st = strategyType || (context as any).strategyType;
@@ -586,10 +623,23 @@ const ForgeStudio: React.FC<ForgeStudioProps> = ({ context, strategyType, brandN
               <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">FORGE 완료</span>
               <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${meta.badge}`}>{meta.label}</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <CopyButton text={output.variants ? output.variants[activeVariant] : output.mainContent} />
-              {/* Markdown 복사 */}
               <MarkdownCopyButton output={output} clusterName={context.marketSignal?.clusterName} strategyType={strategyType} />
+              {/* Blog Editor 전송 — 텍스트 허브 콘텐츠만 */}
+              {mediaType === 'owned_hub' && (
+                <button
+                  onClick={handleSendToBlog}
+                  disabled={sentToBlog}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 transition-all disabled:opacity-50"
+                >
+                  {sentToBlog ? (
+                    <><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7"/></svg> 이동 중...</>
+                  ) : (
+                    <><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg> Blog Editor에서 편집</>
+                  )}
+                </button>
+              )}
               <button
                 onClick={handleReforge}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 transition-all"
