@@ -16,7 +16,7 @@ function resolveApiKey(): string {
 
 const ai = new GoogleGenAI({ apiKey: resolveApiKey() });
 
-const CDJ_MODEL = 'gemini-2.5-flash-preview-05-14';
+const CDJ_MODEL = 'gemini-3-flash-preview';
 
 /** CDJ용 시드 키워드 생성 — aegis의 gemini.ts와 독립적으로 동일 모델 사용 */
 export async function generateCdjSeeds(topic: string, count = 12): Promise<string[]> {
@@ -245,7 +245,7 @@ export const analyzeContent = async ({ topic, sources, period, dateRange, serpDa
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-preview-05-14',
+      model: CDJ_MODEL,
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -367,7 +367,7 @@ export const generateAdImage = async ({
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-preview-05-14',
+      model: CDJ_MODEL,
       contents: contents,
       config: {
         imageConfig: {
@@ -440,7 +440,7 @@ export const generateReelStoryboards = async (adMessage: string): Promise<ReelSt
 
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash-preview-05-14',
+            model: CDJ_MODEL,
             contents: prompt,
             config: {
                 responseMimeType: "application/json",
@@ -489,7 +489,7 @@ export const generateSceneImage = async (description: string, assets: Storyboard
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-preview-05-14',
+      model: CDJ_MODEL,
       contents: { parts },
       config: {
         imageConfig: {
