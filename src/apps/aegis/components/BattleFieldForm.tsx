@@ -58,13 +58,82 @@ const BattleFieldForm: React.FC<BattleFieldFormProps> = ({
           </div>
         </div>
 
-        <h1 className="text-5xl sm:text-6xl font-black tracking-tighter text-slate-900 dark:text-white mb-5 leading-tight">
+        <h1 className="text-5xl sm:text-6xl font-black tracking-tighter text-slate-900 dark:text-white mb-6 leading-tight">
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-indigo-500 to-teal-500 dark:from-indigo-400 dark:via-indigo-300 dark:to-teal-400">
             C³ Cube Strategy
           </span>
           <br />
           <span className="text-slate-800 dark:text-slate-100">Intelligence Engine</span>
         </h1>
+
+        {/* ── C³ 모델 정의 블록 ── */}
+        <div className="max-w-3xl mx-auto mb-8">
+          {/* 수식 레이블 */}
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent to-indigo-200 dark:to-indigo-800/60" />
+            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-indigo-500 dark:text-indigo-400 px-3">
+              C³ = Context × Conversion × Cognition
+            </span>
+            <div className="h-px flex-1 bg-gradient-to-l from-transparent to-indigo-200 dark:to-indigo-800/60" />
+          </div>
+
+          {/* 3개 카드 — 가로 1행 */}
+          <div className="flex items-stretch gap-3">
+            {/* C¹ Context */}
+            <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-indigo-100 dark:border-indigo-800/40 p-4 text-left relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-indigo-500/5 dark:bg-indigo-400/5 rounded-full -mr-6 -mt-6 pointer-events-none" />
+              <div className="flex items-start justify-between gap-1 mb-2">
+                <span className="text-2xl font-black text-indigo-600 dark:text-indigo-400 leading-none">C<sup className="text-sm">1</sup></span>
+                <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/40 text-indigo-500 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-700/40 uppercase tracking-wider shrink-0">CEP 확장</span>
+              </div>
+              <p className="text-[13px] font-black text-slate-800 dark:text-slate-100 mb-1">Context</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed break-keep">
+                소비자가 브랜드를 처음 인식하는 <strong className="text-indigo-600 dark:text-indigo-400">전략적 진입점(CEP)</strong>을 확장 — 시장 내 모든 소비 맥락과 상황을 구조화합니다.
+              </p>
+            </div>
+
+            {/* × */}
+            <div className="flex items-center justify-center w-5 shrink-0">
+              <span className="text-lg font-black text-slate-300 dark:text-slate-600">×</span>
+            </div>
+
+            {/* C² Conversion */}
+            <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-sky-100 dark:border-sky-800/40 p-4 text-left relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-sky-500/5 dark:bg-sky-400/5 rounded-full -mr-6 -mt-6 pointer-events-none" />
+              <div className="flex items-start justify-between gap-1 mb-2">
+                <span className="text-2xl font-black text-sky-600 dark:text-sky-400 leading-none">C<sup className="text-sm">2</sup></span>
+                <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-sky-50 dark:bg-sky-900/40 text-sky-500 dark:text-sky-400 border border-sky-100 dark:border-sky-700/40 uppercase tracking-wider shrink-0">CDJ 확장</span>
+              </div>
+              <p className="text-[13px] font-black text-slate-800 dark:text-slate-100 mb-1">Conversion</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed break-keep">
+                인지 → 고려 → 결정 → 구매후로 이어지는 <strong className="text-sky-600 dark:text-sky-400">고객 구매여정(CDJ)</strong>을 확장 — 단계별 전환 장벽과 기회를 식별합니다.
+              </p>
+            </div>
+
+            {/* × */}
+            <div className="flex items-center justify-center w-5 shrink-0">
+              <span className="text-lg font-black text-slate-300 dark:text-slate-600">×</span>
+            </div>
+
+            {/* C³ Cognition */}
+            <div className="flex-1 bg-white dark:bg-slate-900 rounded-2xl border border-violet-100 dark:border-violet-800/40 p-4 text-left relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-violet-500/5 dark:bg-violet-400/5 rounded-full -mr-6 -mt-6 pointer-events-none" />
+              <div className="flex items-start justify-between gap-1 mb-2">
+                <span className="text-2xl font-black text-violet-600 dark:text-violet-400 leading-none">C<sup className="text-sm">3</sup></span>
+                <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-violet-50 dark:bg-violet-900/40 text-violet-500 dark:text-violet-400 border border-violet-100 dark:border-violet-700/40 uppercase tracking-wider shrink-0">Intent 확장</span>
+              </div>
+              <p className="text-[13px] font-black text-slate-800 dark:text-slate-100 mb-1">Cognition</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-relaxed break-keep">
+                검색 키워드 이면의 <strong className="text-violet-600 dark:text-violet-400">검색 의도(Intent)</strong>를 확장 — 정보 탐색부터 전환까지 4단계 인지 유형으로 분류·분석합니다.
+              </p>
+            </div>
+          </div>
+
+          {/* 통합 설명 한 줄 */}
+          <p className="text-center text-[10px] text-slate-400 dark:text-slate-500 mt-3 leading-relaxed">
+            세 축의 교차점에서 <span className="text-indigo-500 dark:text-indigo-400 font-bold">최우선 전략 기회(Context × Conversion × Cognition)</span>를 자동 식별합니다
+          </p>
+        </div>
 
         <p className="text-base text-slate-500 dark:text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed break-keep text-center">
           키워드 하나를 입력하면 AI가 시장의
