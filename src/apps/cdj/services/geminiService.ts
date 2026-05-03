@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { AnalysisResult, AspectRatio, ImageTone, ReelStoryboard, StoryboardAsset } from '../types';
+import type { SerpApiPayload, EnrichedKeyword } from '@/apps/aegis/services/dataCollection/types';
 
 function resolveApiKey(): string {
   const sources = [
@@ -90,6 +91,7 @@ interface AnalysisParams {
   sources: SearchSource[];
   period: string;
   dateRange: { start: string; end: string } | null;
+  serpData?: SerpApiPayload | null;
 }
 
 const SOURCE_LABEL: Record<SearchSource, string> = {
@@ -105,12 +107,69 @@ function periodToDateRange(period: string): { from: string; to: string } {
     case '1m':  from.setMonth(today.getMonth() - 1); break;
     case '6m':  from.setMonth(today.getMonth() - 6); break;
     case '1y':  from.setFullYear(today.getFullYear() - 1); break;
-    default:    from.setMonth(today.getMonth() - 3); // 3m default
+    default:    from.setMonth(today.getMonth() - 3);
   }
   return { from: from.toISOString().slice(0, 10), to: today.toISOString().slice(0, 10) };
 }
 
-export const analyzeContent = async ({ topic, sources, period, dateRange }: AnalysisParams): Promise<AnalysisResult> => {
+/** Volume range → 0-100 index (midpoint heuristic) */
+function volRangeToIndex(range: string | null | undefined): number {
+  if (!range) return 20;
+  const map: Record<string, number> = {
+    '1~10': 3, '10~100': 10, '100~1000': 25,
+    '1000~10000': 50, '10000~100000': 75, '100000+': 95,
+  };
+  return map[range] ?? 20;
+}
+
+/** Compress EnrichedKeyword array to a compact JSON block for the RAG prompt */
+function buildSerpContext(serpData: SerpApiPayload): string {
+  if (!serpData.keywords.length) return '';
+
+  const compact = serpData.keywords.map((k: EnrichedKeyword) => {
+    const volIndex = Math.max(
+      volRangeToIndex(k.pcVolumeRange),
+      volRangeToIndex(k.mobileVolumeRange),
+    );
+    return {
+      keyword: k.keyword,
+      searchVolumeIndex: volIndex,
+      trend: k.trendData
+        ? `${k.trendData.direction} (momentum: ${k.trendData.momentum.toFixed(2)})`
+        : null,
+      paaQuestions: k.paaQuestions.slice(0, 3),
+      serpFeatures: [
+        k.hasFeaturedSnippet && '답변박스',
+        k.hasAIOverview     && 'AI개요',
+        k.hasShopping       && '쇼핑',
+        k.hasVideoCarousel  && '동영상',
+        k.hasPAA            && 'PAA',
+      ].filter(Boolean),
+      topTitles: k.topResults.slice(0, 2).map(r => r.title),
+    };
+  });
+
+  const src = [
+    serpData.sources.naverApiUsed  && 'Naver',
+    serpData.sources.serperApiUsed && 'Google',
+  ].filter(Boolean).join(' + ');
+
+  return `
+
+    ─── 실시간 수집 데이터 (${src || 'AI 추정'}) ───
+    아래 JSON은 실제 ${src} 검색 API에서 수집한 키워드별 데이터입니다.
+    반드시 이 데이터의 keyword 목록을 우선 활용하고, searchVolumeIndex는 위 값을 그대로 사용하세요.
+    AI가 임의로 볼륨을 추정하거나 변경하지 마십시오.
+    paaQuestions는 검색 의도(searchIntent) 분류에 활용하세요.
+    serpFeatures(답변박스·AI개요)가 있으면 정보성·탐색성 의도 가능성이 높습니다.
+    쇼핑 피처가 있으면 전환성 의도 가능성이 높습니다.
+    trend의 rising/falling/seasonal은 CDJ 단계(인지 확산 vs 성숙 고려) 판단에 활용하세요.
+
+    ${JSON.stringify(compact, null, 2)}
+    ─── 수집 데이터 끝 ───`;
+}
+
+export const analyzeContent = async ({ topic, sources, period, dateRange, serpData }: AnalysisParams): Promise<AnalysisResult> => {
   const sourceLabel = sources.length === 0
     ? 'Naver, Google (통합)'
     : sources.map(s => SOURCE_LABEL[s]).join(' + ');
@@ -118,12 +177,16 @@ export const analyzeContent = async ({ topic, sources, period, dateRange }: Anal
     ? { from: dateRange.start, to: dateRange.end }
     : periodToDateRange(period);
 
+  const serpContext = serpData && !serpData.sources.fallbackToGrounding
+    ? buildSerpContext(serpData)
+    : '';
+
   const prompt = `
     당신은 고객 결정 여정(CDJ)과 검색 엔진 최적화(SEO)를 전문으로 하는 디지털 마케팅 분석가입니다.
     사용자가 제공한 주제인 "${topic}"에 대해 아래 조건에 맞춰 분석을 수행하십시오.
 
     - 분석 소스: ${sourceLabel}
-    - 분석 기간: ${range.from} 부터 ${range.to} 까지
+    - 분석 기간: ${range.from} 부터 ${range.to} 까지${serpContext}
 
     먼저, 사용자가 입력한 주제의 수준(Level)을 판단하세요: (1) 광범위한 주제/제품 카테고리, (2) 특정 분야/브랜드, (3) 구체적인 제품/서비스명.
     CDJ 단계별 키워드 분포는 이 수준을 반영해야 합니다.

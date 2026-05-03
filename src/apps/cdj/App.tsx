@@ -8,7 +8,29 @@ import { Modal } from './components/Modal';
 import { analyzeContent } from './services/geminiService';
 import type { AnalysisResult } from './types';
 import { SearchConfigProvider, useSearchConfig } from '@/apps/aegis/core/search/SearchConfigContext';
-import type { SearchConfig } from '@/apps/aegis/core/search/config';
+import type { SearchConfig, SearchSource } from '@/apps/aegis/core/search/config';
+import { generateSeedKeywords } from '@/apps/aegis/ai/gemini';
+import {
+  collectSerpData,
+  getEnvPipelineConfig,
+  hasRealApiConfig,
+  type PipelineConfig,
+} from '@/apps/aegis/services/dataCollection/pipeline';
+import type { SerpApiPayload } from '@/apps/aegis/services/dataCollection/types';
+
+function buildPipelineConfig(sources: SearchSource[]): PipelineConfig {
+  const full = getEnvPipelineConfig();
+  const useGoogle = sources.includes('google');
+  const useNaver  = sources.includes('naver');
+  return {
+    serperApiKey:      useGoogle ? full.serperApiKey      : undefined,
+    naverClientId:     useNaver  ? full.naverClientId     : undefined,
+    naverClientSecret: useNaver  ? full.naverClientSecret : undefined,
+    naverAdApiKey:     useNaver  ? full.naverAdApiKey     : undefined,
+    naverAdSecret:     useNaver  ? full.naverAdSecret     : undefined,
+    naverAdCustomerId: useNaver  ? full.naverAdCustomerId : undefined,
+  };
+}
 
 function configToLegacyRange(cfg: SearchConfig) {
   if (cfg.dateRange) return { from: cfg.dateRange.start, to: cfg.dateRange.end };
@@ -48,6 +70,7 @@ const MODAL_CONTENT: Record<Exclude<ModalType, null>, { title: string; body: str
 const CdjInner: React.FC = () => {
   const { config } = useSearchConfig();
   const [isLoading, setIsLoading]           = useState(false);
+  const [progressMsg, setProgressMsg]       = useState('');
   const [error, setError]                   = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [activeModal, setActiveModal]       = useState<ModalType>(null);
@@ -58,17 +81,39 @@ const CdjInner: React.FC = () => {
     setError(null);
     setAnalysisResult(null);
     setCurrentTopic(topic);
+
     try {
+      // Step 1: 시드 키워드 생성
+      setProgressMsg('🔍 키워드 시드 생성 중...');
+      const seeds = await generateSeedKeywords(topic, 12);
+
+      // Step 2: 실시간 SERP 데이터 수집 (API 키 있을 때만)
+      let serpData: SerpApiPayload | null = null;
+      const pipelineCfg = buildPipelineConfig(config.sources);
+      if (hasRealApiConfig(pipelineCfg)) {
+        setProgressMsg('📡 실시간 데이터 수집 중...');
+        serpData = await collectSerpData(
+          topic,
+          seeds,
+          pipelineCfg,
+          (step, done, total) => setProgressMsg(`📡 ${step} (${done}/${total})`),
+        );
+      }
+
+      // Step 3: CDJ 분석
+      setProgressMsg('🗺️ CDJ 여정 분석 중...');
       setAnalysisResult(await analyzeContent({
         topic,
         sources: config.sources,
         period: config.period,
         dateRange: config.dateRange,
+        serpData,
       }));
     } catch {
       setError('분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
     } finally {
       setIsLoading(false);
+      setProgressMsg('');
     }
   }, [config]);
 
@@ -93,7 +138,7 @@ const CdjInner: React.FC = () => {
 
       <main className="container mx-auto px-4 py-8">
         <InputForm onAnalyze={handleAnalysis} isLoading={isLoading} />
-        {isLoading && <Loader />}
+        {isLoading && <Loader message={progressMsg || undefined} />}
         {error && <p className="text-center text-rose-400 mt-8">{error}</p>}
         {!analysisResult && !isLoading && !error && <InputGuide />}
         {analysisResult && legacyInputParams && !isLoading && (
