@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import AppHeader from '@/shared/components/AppHeader';
 import type { AnalysisResultItem, Cluster, ClusterResult, AeoContent, AeoScoreReport, KeywordIntelligence, FullAnalysisResult } from './types';
 import InputForm from './components/InputForm';
@@ -13,6 +14,7 @@ import AeoDiagnosisDisplay from './components/AeoDiagnosisDisplay';
 import { getSearchData, analyzeTrends, generateTargetProfiles, generateAeoContent, rewriteAeoContent, generateComparisonReport, getAeoScore, improveAeoContentBasedOnDiagnosis, identifyKeywordLevel } from './services/geminiService';
 
 const CepApp: React.FC = () => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading]                   = useState(false);
   const [error, setError]                           = useState<string | null>(null);
   const [analysisResult, setAnalysisResult]         = useState<AnalysisResultItem[] | null>(null);
@@ -161,7 +163,24 @@ const CepApp: React.FC = () => {
         subtitle="CEP 트렌드 · 타겟 페르소나 · AEO 콘텐츠 분석"
         accentColor="text-violet-400" iconBg="bg-violet-600" theme="dark"
         actions={(analysisResult || batchResults) ? (
-          <button onClick={handlePrint} className="print:hidden">PDF 출력</button>
+          <div className="flex items-center gap-2 print:hidden">
+            {clusterResult && currentQuery && (
+              <button
+                onClick={() => {
+                  sessionStorage.setItem('aesa_to_c3', JSON.stringify({
+                    category: currentQuery,
+                    brandName: '',
+                    competitors: [],
+                  }));
+                  navigate('/tools/c3');
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-xl transition-colors"
+              >
+                <span>⚡</span>C³에서 전략 수립
+              </button>
+            )}
+            <button onClick={handlePrint}>PDF 출력</button>
+          </div>
         ) : undefined}
       />
 
