@@ -126,7 +126,7 @@ Style: Cinematic, no text overlays, 9:16 composition, professional lighting.
 ` });
 
   const response = await getAi().models.generateContent({
-    model: 'gemini-2.5-flash-preview-05-14',
+    model: 'gemini-3-flash-preview',
     contents: { parts },
     config: { imageConfig: { aspectRatio: '9:16' } },
   });
@@ -210,7 +210,7 @@ export async function generateAdImage(params: AdImageParams): Promise<string> {
   }
 
   const response = await getAi().models.generateContent({
-    model: 'gemini-2.5-flash-preview-05-14',
+    model: 'gemini-3-flash-preview',
     contents: { parts: [...imageParts, { text: `${bgPrompt}\n${coreVisualPrompt}` }] },
     config: { imageConfig: { aspectRatio } },
   });
