@@ -10,7 +10,7 @@ export const posts: BlogPost[] = [
     category: '마케팅 인사이트',
     tags: ['검색최적화', 'AEO', 'GEO', '마케팅전략', 'MarketingPivot', 'AI검색', '마케팅싱귤래리티'],
     author: { name: '김도학', role: 'CEO · 경영학 박사', org: '북경아이디어큐브컨설팅' },
-    publishedAt: '2026-02-04',
+    publishedAt: '2026-05-03',
     updatedAt: '2026-05-03',
     readingTime: 7,
     heroImage: '',
