@@ -1,12 +1,10 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, Suspense, lazy } from 'react';
 import { MarketingReport, AnalysisResult } from '../types';
 import { List } from './List';
 import { MarketChart } from './MarketChart';
 import { PositioningMap } from './PositioningMap';
-import PDFReport from './PDFReport';
-import { PDFDownloadLink } from '@react-pdf/renderer';
-// @ts-ignore
-// html2pdf 제거 — @react-pdf/renderer로 대체됨
+
+const LazyPDFLink = lazy(() => import('./LazyPDFLink'));
 
 interface ReportViewProps {
   report: MarketingReport;
@@ -201,22 +199,20 @@ export const ReportView: React.FC<ReportViewProps> = ({ report, result, onClose,
           편집 대시보드
         </button>
         <div className="flex gap-4">
-          <PDFDownloadLink
-            document={<PDFReport result={result} report={report} />}
-            fileName={`AESA_Report_${result.threeC?.company?.name || 'Report'}_${new Date().toISOString().slice(0,10)}.pdf`}
-            className="bg-blue-600 text-white px-8 py-5 rounded-2xl font-black shadow-2xl hover:scale-105 transition-all flex items-center gap-3 focus:outline-none focus:ring-4 focus:ring-blue-500"
-          >
-            {({ loading, error }) => (
-              <>
-                {loading ? (
-                  <div className="w-6 h-6 border-[3px] border-blue-100 border-t-white rounded-full animate-spin"></div>
-                ) : (
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
-                )}
-                {error ? "오류 — 재시도" : loading ? "PDF 생성 중..." : "전략 보고서 PDF 다운로드"}
-              </>
-            )}
-          </PDFDownloadLink>
+          <Suspense fallback={
+            <span className="bg-blue-500 text-white px-8 py-5 rounded-2xl font-black flex items-center gap-3 cursor-wait">
+              <div className="w-5 h-5 border-[3px] border-blue-200 border-t-white rounded-full animate-spin" />
+              PDF 준비 중...
+            </span>
+          }>
+            <LazyPDFLink
+              result={result}
+              report={report}
+              fileName={`AESA_Report_${result.threeC?.company?.name || 'Report'}_${new Date().toISOString().slice(0,10)}.pdf`}
+              className="bg-blue-600 text-white px-8 py-5 rounded-2xl font-black shadow-2xl hover:scale-105 transition-all flex items-center gap-3 focus:outline-none focus:ring-4 focus:ring-blue-500"
+              variant="report"
+            />
+          </Suspense>
         </div>
       </div>
       <div className="pb-40 flex flex-col items-center report-content">

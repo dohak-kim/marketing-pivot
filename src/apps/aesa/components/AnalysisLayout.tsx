@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useRef } from 'react';
-import { PDFDownloadLink } from '@react-pdf/renderer';
-import PDFReport from './PDFReport';
+import React, { useState, useMemo, useRef, Suspense, lazy } from 'react';
+
+const LazyPDFLink = lazy(() => import('./LazyPDFLink'));
 import { AnalysisResult, MarketingReport, CategorizedSources } from '../types';
 import { Card } from './Card';
 import { List } from './List';
@@ -479,36 +479,20 @@ export const AnalysisLayout: React.FC<AnalysisLayoutProps> = ({ result, keyword,
           <p className="text-blue-100 text-lg opacity-90 leading-relaxed font-light italic break-keep">시장 트렌드 및 환경분석, STP 및 4P's Mix 전략까지 총괄한 자사의 마케팅 전략 보고서를 다운로드하세요.</p>
         </div>
         {report ? (
-          <PDFDownloadLink
-            document={<PDFReport result={result} report={report} />}
-            fileName={`AESA_Report_${new Date().toISOString().slice(0,10)}.pdf`}
-            className="bg-white text-[#002d72] px-10 py-4 rounded-2xl font-black text-xl shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-4 shrink-0 no-underline"
-          >
-            {({ loading, error }) => (
-              <span className="flex items-center gap-3">
-                {loading ? (
-                  <>
-                    <div className="w-6 h-6 border-[3px] border-blue-200 border-t-[#002d72] rounded-full animate-spin" />
-                    PDF 생성 중... (폰트 로딩 포함)
-                  </>
-                ) : error ? (
-                  <>
-                    <span className="text-red-500">⚠</span>
-                    오류 발생 — 클릭하여 재시도
-                  </>
-                ) : (
-                  <>
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                      <polyline points="7 10 12 15 17 10"/>
-                      <line x1="12" y1="15" x2="12" y2="3"/>
-                    </svg>
-                    전략 보고서 PDF 다운로드
-                  </>
-                )}
-              </span>
-            )}
-          </PDFDownloadLink>
+          <Suspense fallback={
+            <span className="bg-white/20 text-white px-10 py-4 rounded-2xl font-black text-xl flex items-center gap-3 cursor-wait">
+              <div className="w-5 h-5 border-[3px] border-blue-200 border-t-white rounded-full animate-spin" />
+              PDF 준비 중...
+            </span>
+          }>
+            <LazyPDFLink
+              result={result}
+              report={report}
+              fileName={`AESA_Report_${new Date().toISOString().slice(0,10)}.pdf`}
+              className="bg-white text-[#002d72] px-10 py-4 rounded-2xl font-black text-xl shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-4 shrink-0 no-underline"
+              variant="analysis"
+            />
+          </Suspense>
         ) : (
           <button onClick={handleCreateReport} disabled={isGenerating} className="bg-white text-[#002d72] px-10 py-4 rounded-2xl font-black text-xl shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-4 disabled:opacity-50 shrink-0 focus:outline-none focus:ring-4 focus:ring-blue-300">
             {isGenerating ? (
