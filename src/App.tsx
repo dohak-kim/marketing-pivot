@@ -39,12 +39,22 @@ const TOOLS = [
   { path: '/tools/forge',       label: 'AEGIS FORGE',             icon: '⚒️' },
 ];
 
+// 전략 흐름 단계
+const FLOW_STEPS = [
+  { step: 1, label: 'AESA',        short: 'AESA',     icon: '📡', href: '/tools/aesa',       paths: ['/tools/aesa'] },
+  { step: 2, label: 'C³ Strategy', short: 'C³',       icon: '⚡', href: '/tools/c3',         paths: ['/tools/c3'] },
+  { step: 3, label: 'Path·Signal', short: 'Path·Sig', icon: '🗺️', href: '/tools/pathfinder', paths: ['/tools/pathfinder', '/tools/signal'] },
+  { step: 4, label: 'FORGE',       short: 'FORGE',    icon: '⚒️', href: '/tools/forge',      paths: ['/tools/forge'] },
+  { step: 5, label: 'Blog',        short: 'Blog',     icon: '✏️', href: '/admin/blog',       paths: ['/admin/blog'] },
+] as const;
+
 
 // ── 글로벌 네비게이션 ─────────────────────────────────────────────────────
 function GlobalNav() {
   const { pathname } = useLocation();
   const [toolsOpen, setToolsOpen] = useState(false);
   const isToolPage = pathname.startsWith('/tools');
+  const activeStepIdx = FLOW_STEPS.findIndex(s => s.paths.some(p => pathname.startsWith(p)));
 
   return (
     <>
@@ -92,16 +102,37 @@ function GlobalNav() {
           </div>
         </div>
 
-        {/* 도구 페이지 서브 네비 */}
+        {/* 도구 페이지 — 전략 흐름 서브 네비 */}
         {isToolPage && (
           <div className="border-t border-white/5 bg-slate-900/80">
-            <div className="max-w-7xl mx-auto px-6 flex items-center gap-1 h-9 overflow-x-auto no-scrollbar">
-              {TOOLS.map(t => (
-                <NavLink key={t.path} to={t.path}
-                  className={({ isActive }) => `flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${isActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
-                  <span>{t.icon}</span><span>{t.label}</span>
-                </NavLink>
-              ))}
+            <div className="max-w-7xl mx-auto px-6 flex items-center gap-0 h-9 overflow-x-auto no-scrollbar">
+              {FLOW_STEPS.map((s, i) => {
+                const isActive = activeStepIdx === i;
+                const isDone   = activeStepIdx > i;
+                return (
+                  <React.Fragment key={s.step}>
+                    <Link
+                      to={s.href}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
+                        isActive
+                          ? 'bg-white/10 text-white'
+                          : isDone
+                            ? 'text-slate-400 hover:text-white hover:bg-white/5'
+                            : 'text-slate-600 hover:text-slate-400 hover:bg-white/5'
+                      }`}
+                    >
+                      <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black shrink-0 ${
+                        isActive ? 'bg-indigo-500 text-white' : isDone ? 'bg-slate-700 text-slate-400' : 'bg-slate-800 text-slate-600'
+                      }`}>{s.step}</span>
+                      <span className="hidden sm:inline">{s.label}</span>
+                      <span className="sm:hidden">{s.short}</span>
+                    </Link>
+                    {i < FLOW_STEPS.length - 1 && (
+                      <span className={`text-[10px] px-1 shrink-0 ${activeStepIdx > i ? 'text-slate-500' : 'text-slate-700'}`}>→</span>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </div>
           </div>
         )}

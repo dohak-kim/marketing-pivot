@@ -84,13 +84,16 @@ const AppContent: React.FC = () => {
 
   const [battleInput, setBattleInput] = useState<BattleFieldInput | null>(null);
   const [lastDiscoveryValue, setLastDiscoveryValue] = useState('');
-  const [formPrefill, setFormPrefill] = useState<{ category: string; brandName: string } | null>(() => {
+  const [formPrefill, setFormPrefill] = useState<{ category: string; brandName: string; competitors?: string[] } | null>(() => {
     try {
-      const raw = sessionStorage.getItem('cdj_to_c3');
-      if (!raw) return null;
-      const data = JSON.parse(raw);
-      sessionStorage.removeItem('cdj_to_c3');
-      return data;
+      for (const key of ['aesa_to_c3', 'cdj_to_c3']) {
+        const raw = sessionStorage.getItem(key);
+        if (raw) {
+          sessionStorage.removeItem(key);
+          return JSON.parse(raw);
+        }
+      }
+      return null;
     } catch { return null; }
   });
   
@@ -849,6 +852,7 @@ const AppContent: React.FC = () => {
                 onSubmit={handleDiscoverySuggest}
                 initialCategory={formPrefill?.category ?? ''}
                 initialBrandName={formPrefill?.brandName ?? ''}
+                initialCompetitors={formPrefill?.competitors}
              />
            </div>
         ) : (

@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AnalysisResult, AnalysisStep, MarketingReport, AnalysisInputs } from './types';
 import { GeminiService } from './services/geminiService';
 import { AnalysisLayout } from './components/AnalysisLayout';
@@ -6,6 +7,7 @@ import { UserGuide } from './components/UserGuide';
 import AppHeader from '@/shared/components/AppHeader';
 
 const AesaApp: React.FC = () => {
+  const navigate = useNavigate();
   const [category, setCategory]       = useState('');
   const [ownBrand, setOwnBrand]       = useState('');
   const [competitor1, setCompetitor1] = useState('');
@@ -63,6 +65,15 @@ const AesaApp: React.FC = () => {
     setKeywords(''); setContext('');
   };
 
+  const handleGoToC3 = () => {
+    sessionStorage.setItem('aesa_to_c3', JSON.stringify({
+      category,
+      brandName: ownBrand,
+      competitors: [competitor1, competitor2, competitor3, competitor4].filter(c => c.trim()),
+    }));
+    navigate('/tools/c3');
+  };
+
   const getStatusMessage = () => {
     const map: Record<string, string> = {
       'optimizing-query':  '🔍 Query Optimization: 네이버 최적 검색어 도출 중...',
@@ -93,6 +104,14 @@ const AesaApp: React.FC = () => {
         subtitle="Intelligence Strategy Engine · PEST·3C·SWOT·STP"
         accentColor="text-blue-600" iconBg="bg-blue-600" theme="light"
         actions={<>
+          {step === 'complete' && (
+            <button
+              onClick={handleGoToC3}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black rounded-xl transition-colors"
+            >
+              <span>⚡</span>C³에서 전략 수립
+            </button>
+          )}
           {step !== 'idle' && step !== 'error' && (
             <button onClick={handleReset}>새로운 분석</button>
           )}

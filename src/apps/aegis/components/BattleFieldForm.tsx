@@ -9,6 +9,7 @@ interface BattleFieldFormProps {
   onSubmit: (data: BattleFieldInput) => void;
   initialCategory?: string;
   initialBrandName?: string;
+  initialCompetitors?: string[];
 }
 
 const BattleFieldForm: React.FC<BattleFieldFormProps> = ({
@@ -17,10 +18,11 @@ const BattleFieldForm: React.FC<BattleFieldFormProps> = ({
   onSubmit,
   initialCategory = '',
   initialBrandName = '',
+  initialCompetitors,
 }) => {
   const [category, setCategory] = useState(initialCategory);
   const [brandName, setBrandName] = useState(initialBrandName);
-  const [competitors, setCompetitors] = useState('');
+  const [competitors, setCompetitors] = useState(initialCompetitors?.join(', ') ?? '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
