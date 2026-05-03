@@ -83,22 +83,47 @@ const responseSchema = {
     required: ['keywords', 'intentDistribution', 'strategicOutlines', 'strategicInsights', 'matrixImplication', 'keywordInsights'],
 };
 
+export type SearchSource = 'naver' | 'google';
+
 interface AnalysisParams {
   topic: string;
-  sourceType: string;
-  dateRange: {
-    from: string;
-    to: string;
-  };
+  sources: SearchSource[];
+  period: string;
+  dateRange: { start: string; end: string } | null;
 }
 
-export const analyzeContent = async ({ topic, sourceType, dateRange }: AnalysisParams): Promise<AnalysisResult> => {
+const SOURCE_LABEL: Record<SearchSource, string> = {
+  naver: 'Naver (블로그·카페·뉴스)',
+  google: 'Google (웹·뉴스·유튜브)',
+};
+
+function periodToDateRange(period: string): { from: string; to: string } {
+  const today = new Date();
+  const from = new Date(today);
+  switch (period) {
+    case '1w':  from.setDate(today.getDate() - 7); break;
+    case '1m':  from.setMonth(today.getMonth() - 1); break;
+    case '6m':  from.setMonth(today.getMonth() - 6); break;
+    case '1y':  from.setFullYear(today.getFullYear() - 1); break;
+    default:    from.setMonth(today.getMonth() - 3); // 3m default
+  }
+  return { from: from.toISOString().slice(0, 10), to: today.toISOString().slice(0, 10) };
+}
+
+export const analyzeContent = async ({ topic, sources, period, dateRange }: AnalysisParams): Promise<AnalysisResult> => {
+  const sourceLabel = sources.length === 0
+    ? 'Naver, Google (통합)'
+    : sources.map(s => SOURCE_LABEL[s]).join(' + ');
+  const range = dateRange
+    ? { from: dateRange.start, to: dateRange.end }
+    : periodToDateRange(period);
+
   const prompt = `
     당신은 고객 결정 여정(CDJ)과 검색 엔진 최적화(SEO)를 전문으로 하는 디지털 마케팅 분석가입니다.
     사용자가 제공한 주제인 "${topic}"에 대해 아래 조건에 맞춰 분석을 수행하십시오.
 
-    - 분석 소스: "${sourceType}"
-    - 분석 기간: ${dateRange.from} 부터 ${dateRange.to} 까지
+    - 분석 소스: ${sourceLabel}
+    - 분석 기간: ${range.from} 부터 ${range.to} 까지
 
     먼저, 사용자가 입력한 주제의 수준(Level)을 판단하세요: (1) 광범위한 주제/제품 카테고리, (2) 특정 분야/브랜드, (3) 구체적인 제품/서비스명.
     CDJ 단계별 키워드 분포는 이 수준을 반영해야 합니다.

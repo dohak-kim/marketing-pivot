@@ -7,13 +7,27 @@ import { Loader } from './components/Loader';
 import { Modal } from './components/Modal';
 import { analyzeContent } from './services/geminiService';
 import type { AnalysisResult } from './types';
+import { SearchConfigProvider, useSearchConfig } from '@/apps/aegis/core/search/SearchConfigContext';
+import type { SearchConfig } from '@/apps/aegis/core/search/config';
+
+function configToLegacyRange(cfg: SearchConfig) {
+  if (cfg.dateRange) return { from: cfg.dateRange.start, to: cfg.dateRange.end };
+  const today = new Date();
+  const from = new Date(today);
+  switch (cfg.period) {
+    case '1w': from.setDate(today.getDate() - 7); break;
+    case '1m': from.setMonth(today.getMonth() - 1); break;
+    case '6m': from.setMonth(today.getMonth() - 6); break;
+    case '1y': from.setFullYear(today.getFullYear() - 1); break;
+    default:   from.setMonth(today.getMonth() - 3);
+  }
+  return { from: from.toISOString().slice(0, 10), to: today.toISOString().slice(0, 10) };
+}
 
 type ModalType = 'about' | 'usage' | 'interpretation' | null;
 
 interface AnalysisParams {
   topic: string;
-  sourceType: string;
-  dateRange: { from: string; to: string };
 }
 
 const MODAL_CONTENT: Record<Exclude<ModalType, null>, { title: string; body: string }> = {
@@ -31,26 +45,36 @@ const MODAL_CONTENT: Record<Exclude<ModalType, null>, { title: string; body: str
   },
 };
 
-const CdjApp: React.FC = () => {
+const CdjInner: React.FC = () => {
+  const { config } = useSearchConfig();
   const [isLoading, setIsLoading]           = useState(false);
   const [error, setError]                   = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [activeModal, setActiveModal]       = useState<ModalType>(null);
-  const [currentParams, setCurrentParams]   = useState<AnalysisParams | null>(null);
+  const [currentTopic, setCurrentTopic]     = useState<string>('');
 
-  const handleAnalysis = useCallback(async (params: AnalysisParams) => {
+  const handleAnalysis = useCallback(async ({ topic }: AnalysisParams) => {
     setIsLoading(true);
     setError(null);
     setAnalysisResult(null);
-    setCurrentParams(params);
+    setCurrentTopic(topic);
     try {
-      setAnalysisResult(await analyzeContent(params));
+      setAnalysisResult(await analyzeContent({
+        topic,
+        sources: config.sources,
+        period: config.period,
+        dateRange: config.dateRange,
+      }));
     } catch {
       setError('분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [config]);
+
+  const legacyInputParams = currentTopic
+    ? { topic: currentTopic, sourceType: config.sources.join(' + ').toUpperCase(), dateRange: configToLegacyRange(config) }
+    : null;
 
   return (
     <div className="min-h-screen bg-slate-950 text-white font-sans">
@@ -72,8 +96,8 @@ const CdjApp: React.FC = () => {
         {isLoading && <Loader />}
         {error && <p className="text-center text-rose-400 mt-8">{error}</p>}
         {!analysisResult && !isLoading && !error && <InputGuide />}
-        {analysisResult && currentParams && !isLoading && (
-          <ResultsDashboard result={analysisResult} inputParams={currentParams} />
+        {analysisResult && legacyInputParams && !isLoading && (
+          <ResultsDashboard result={analysisResult} inputParams={legacyInputParams} />
         )}
       </main>
 
@@ -85,5 +109,11 @@ const CdjApp: React.FC = () => {
     </div>
   );
 };
+
+const CdjApp: React.FC = () => (
+  <SearchConfigProvider>
+    <CdjInner />
+  </SearchConfigProvider>
+);
 
 export default CdjApp;
