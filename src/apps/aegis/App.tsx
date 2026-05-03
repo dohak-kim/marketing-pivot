@@ -33,6 +33,7 @@ import { TemporalComparison, TemporalInsight, buildTemporalComparison, getPeriod
 import { AnalysisPeriod } from './core/search/analysisPeriod.types';
 import { DateRange } from './core/search/config';
 import { saveSnapshot, loadSnapshots, ContextSnapshot } from './core/analysis/snapshotStorage';
+import { saveProject, loadProjects, deleteProject, formatProjectDate, AegisProject } from './core/analysis/projectStorage';
 import CDJLadderView from './components/CDJLadderView';
 import VizSummaryPanel from './components/VizSummaryPanel';
 import { generateSeedKeywords } from './ai/gemini';
@@ -113,6 +114,12 @@ const AppContent: React.FC = () => {
   // Snapshot State
   const [showSnapshotModal, setShowSnapshotModal] = useState(false);
   const [snapshotName, setSnapshotName] = useState('');
+
+  // ── 프로젝트 저장/불러오기 ──────────────────────────────────────────────
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [projectName, setProjectName] = useState('');
+  const [savedProjects, setSavedProjects] = useState<AegisProject[]>([]);
+  const [projectSaving, setProjectSaving] = useState(false);
 
   // Export State
   const [showExportModal, setShowExportModal] = useState(false);
@@ -682,6 +689,40 @@ const AppContent: React.FC = () => {
     setShowSnapshotModal(false);
   };
 
+  const handleOpenProjectModal = async () => {
+    const projects = await loadProjects();
+    setSavedProjects(projects);
+    setProjectName('');
+    setShowProjectModal(true);
+  };
+
+  const handleSaveProject = async () => {
+    if (!contexts.length || !battleInput) return;
+    setProjectSaving(true);
+    try {
+      await saveProject(battleInput, contexts, projectName || undefined);
+      const projects = await loadProjects();
+      setSavedProjects(projects);
+      setProjectName('');
+    } finally {
+      setProjectSaving(false);
+    }
+  };
+
+  const handleLoadProject = (project: AegisProject) => {
+    setBattleInput(project.battleInput);
+    setContexts(project.contexts);
+    setLastDiscoveryValue(project.battleInput.category);
+    setAutoContexts(project.contexts);
+    setUserContexts([]);
+    setShowProjectModal(false);
+  };
+
+  const handleDeleteProject = async (id: string) => {
+    await deleteProject(id);
+    setSavedProjects(prev => prev.filter(p => p.id !== id));
+  };
+
   const handleRefreshVizSummary = async () => {
     if (!contexts.length || !lastDiscoveryValue) return;
     setVizSummaries(prev => ({ ...prev, [vizMode]: null }));
@@ -965,6 +1006,17 @@ const AppContent: React.FC = () => {
                       스냅샷 저장
                     </button>
                   )}
+                  {/* 프로젝트 저장/불러오기 버튼 */}
+                  <button
+                    onClick={handleOpenProjectModal}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 hover:border-violet-400 hover:text-violet-600 dark:hover:text-violet-400 transition-all shadow-sm"
+                    title="분석 세션 저장 및 불러오기"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                    프로젝트
+                  </button>
                   <div className="flex items-center space-x-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-1.5 rounded-xl shadow-sm">
                     <button
                       onClick={() => setViewMode('cards')}
@@ -1031,6 +1083,83 @@ const AppContent: React.FC = () => {
                           </div>
                         </div>
                       )}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── 프로젝트 저장/불러오기 모달 ── */}
+                {showProjectModal && (
+                  <div className="fixed inset-0 z-[70] flex items-center justify-center p-6">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowProjectModal(false)} />
+                    <div className="relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-8 w-full max-w-lg shadow-2xl animate-in fade-in zoom-in-95">
+                      <h3 className="text-lg font-black text-slate-900 dark:text-white mb-1">분석 세션 관리</h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">
+                        전략 분석 세션을 저장하고 나중에 이어서 작업할 수 있습니다.
+                      </p>
+
+                      {/* 현재 세션 저장 */}
+                      {contexts.length > 0 && battleInput && (
+                        <div className="mb-5 p-4 bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-500/30 rounded-xl">
+                          <p className="text-[10px] font-black text-violet-600 dark:text-violet-400 uppercase tracking-widest mb-2">현재 세션 저장</p>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={projectName}
+                              onChange={e => setProjectName(e.target.value)}
+                              placeholder={`${battleInput.category} 분석`}
+                              className="flex-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+                              onKeyDown={e => e.key === 'Enter' && handleSaveProject()}
+                            />
+                            <button
+                              onClick={handleSaveProject}
+                              disabled={projectSaving}
+                              className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-xs font-black transition-all"
+                            >
+                              {projectSaving ? '저장 중...' : '저장'}
+                            </button>
+                          </div>
+                          <p className="text-[9px] text-violet-500 dark:text-violet-400 mt-1.5">{contexts.length}개 CEP · {battleInput.category}</p>
+                        </div>
+                      )}
+
+                      {/* 저장된 프로젝트 목록 */}
+                      {savedProjects.length > 0 ? (
+                        <div>
+                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">저장된 세션 ({savedProjects.length}개)</p>
+                          <div className="space-y-2 max-h-64 overflow-y-auto no-scrollbar">
+                            {savedProjects.map(p => (
+                              <div key={p.id} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-black text-slate-700 dark:text-slate-200 truncate">{p.name}</p>
+                                  <p className="text-[9px] text-slate-400 mt-0.5">
+                                    {p.cepCount}개 CEP · {formatProjectDate(p.savedAt)}
+                                    {p.battleInput.brandName && ` · ${p.battleInput.brandName}`}
+                                  </p>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                  <button
+                                    onClick={() => handleLoadProject(p)}
+                                    className="px-2.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black transition-colors"
+                                  >불러오기</button>
+                                  <button
+                                    onClick={() => handleDeleteProject(p.id)}
+                                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors opacity-0 group-hover:opacity-100"
+                                  >
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-center text-xs text-slate-400 py-4">저장된 세션이 없습니다.</p>
+                      )}
+
+                      <button
+                        onClick={() => setShowProjectModal(false)}
+                        className="w-full mt-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-black text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                      >닫기</button>
                     </div>
                   </div>
                 )}
