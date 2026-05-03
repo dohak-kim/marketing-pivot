@@ -39,22 +39,12 @@ const TOOLS = [
   { path: '/tools/forge',       label: 'AEGIS FORGE',             icon: '⚒️' },
 ];
 
-// 전략 흐름 단계
-const FLOW_STEPS = [
-  { step: 1, label: 'AESA',        short: 'AESA',     icon: '📡', href: '/tools/aesa',       paths: ['/tools/aesa'] },
-  { step: 2, label: 'C³ Strategy', short: 'C³',       icon: '⚡', href: '/tools/c3',         paths: ['/tools/c3'] },
-  { step: 3, label: 'Path·Signal', short: 'Path·Sig', icon: '🗺️', href: '/tools/pathfinder', paths: ['/tools/pathfinder', '/tools/signal'] },
-  { step: 4, label: 'FORGE',       short: 'FORGE',    icon: '⚒️', href: '/tools/forge',      paths: ['/tools/forge'] },
-  { step: 5, label: 'Blog',        short: 'Blog',     icon: '✏️', href: '/admin/blog',       paths: ['/admin/blog'] },
-] as const;
-
 
 // ── 글로벌 네비게이션 ─────────────────────────────────────────────────────
 function GlobalNav() {
   const { pathname } = useLocation();
   const [toolsOpen, setToolsOpen] = useState(false);
   const isToolPage = pathname.startsWith('/tools');
-  const activeStepIdx = FLOW_STEPS.findIndex(s => s.paths.some(p => pathname.startsWith(p)));
 
   return (
     <>
@@ -75,20 +65,20 @@ function GlobalNav() {
             ))}
           </div>
 
-          {/* 도구 버튼 */}
+          {/* 솔루션 버튼 */}
           <div className="relative shrink-0">
             <button onClick={() => setToolsOpen(!toolsOpen)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all border ${isToolPage || toolsOpen ? 'bg-indigo-600 border-indigo-500 text-white' : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'}`}>
               <span>⚡</span>
-              <span>도구 열기</span>
+              <span>솔루션 열기</span>
               <span className={`transition-transform ${toolsOpen ? 'rotate-180' : ''}`}>▾</span>
             </button>
 
-            {/* 도구 드롭다운 */}
+            {/* 솔루션 드롭다운 */}
             {toolsOpen && (
               <div className="absolute right-0 top-full mt-2 w-72 bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50">
                 <div className="px-4 py-2.5 border-b border-white/5">
-                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Project AEGIS 도구</span>
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Project AEGIS 솔루션</span>
                 </div>
                 {TOOLS.map(t => (
                   <Link key={t.path} to={t.path} onClick={() => setToolsOpen(false)}
@@ -102,37 +92,16 @@ function GlobalNav() {
           </div>
         </div>
 
-        {/* 도구 페이지 — 전략 흐름 서브 네비 */}
+        {/* 도구 페이지 — 6개 앱 탭 */}
         {isToolPage && (
           <div className="border-t border-white/5 bg-slate-900/80">
-            <div className="max-w-7xl mx-auto px-6 flex items-center gap-0 h-9 overflow-x-auto no-scrollbar">
-              {FLOW_STEPS.map((s, i) => {
-                const isActive = activeStepIdx === i;
-                const isDone   = activeStepIdx > i;
-                return (
-                  <React.Fragment key={s.step}>
-                    <Link
-                      to={s.href}
-                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${
-                        isActive
-                          ? 'bg-white/10 text-white'
-                          : isDone
-                            ? 'text-slate-400 hover:text-white hover:bg-white/5'
-                            : 'text-slate-600 hover:text-slate-400 hover:bg-white/5'
-                      }`}
-                    >
-                      <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-black shrink-0 ${
-                        isActive ? 'bg-indigo-500 text-white' : isDone ? 'bg-slate-700 text-slate-400' : 'bg-slate-800 text-slate-600'
-                      }`}>{s.step}</span>
-                      <span className="hidden sm:inline">{s.label}</span>
-                      <span className="sm:hidden">{s.short}</span>
-                    </Link>
-                    {i < FLOW_STEPS.length - 1 && (
-                      <span className={`text-[10px] px-1 shrink-0 ${activeStepIdx > i ? 'text-slate-500' : 'text-slate-700'}`}>→</span>
-                    )}
-                  </React.Fragment>
-                );
-              })}
+            <div className="max-w-7xl mx-auto px-6 flex items-center gap-1 h-9 overflow-x-auto no-scrollbar">
+              {TOOLS.map(t => (
+                <NavLink key={t.path} to={t.path}
+                  className={({ isActive }) => `flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap transition-all ${isActive ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}>
+                  <span>{t.icon}</span><span>{t.label}</span>
+                </NavLink>
+              ))}
             </div>
           </div>
         )}
