@@ -6,8 +6,8 @@ function makeSignature(timestamp: string, method: string, path: string, secretKe
 }
 
 export default async function handler(req: any, res: any) {
-  const accessLicense = process.env.VITE_NAVER_AD_ACCESS_LICENSE;
-  const secretKey     = process.env.VITE_NAVER_AD_SECRET_KEY;
+  const accessLicense = process.env.VITE_NAVER_AD_API_KEY;
+  const secretKey     = process.env.VITE_NAVER_AD_SECRET;
   const customerId    = process.env.VITE_NAVER_AD_CUSTOMER_ID;
 
   if (!accessLicense || !secretKey) {
@@ -18,10 +18,11 @@ export default async function handler(req: any, res: any) {
   const subPath      = pathSegments ? pathSegments.join('/') : '';
   const queryString  = new URLSearchParams(req.query as Record<string, string>);
   queryString.delete('path');
-  const qs        = queryString.toString();
-  const apiPath   = `/keywordstool${subPath ? `/${subPath}` : ''}${qs ? `?${qs}` : ''}`;
-  const timestamp = String(Date.now());
-  const signature = makeSignature(timestamp, req.method, apiPath, secretKey);
+  const qs          = queryString.toString();
+  const pathForSign = `/${subPath}`;
+  const apiPath     = `${pathForSign}${qs ? `?${qs}` : ''}`;
+  const timestamp   = String(Date.now());
+  const signature   = makeSignature(timestamp, req.method, pathForSign, secretKey);
 
   const targetUrl = `https://api.naver.com${apiPath}`;
 
