@@ -49,7 +49,7 @@ export async function collectKeywords(params: KeywordCollectionParams): Promise<
   `;
 
   const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-preview',
+    model: 'gemini-3.1-pro-preview',
     contents: prompt,
     config: {
       temperature: 0.15, // 키워드 분류 — 팩트 기반 정확도

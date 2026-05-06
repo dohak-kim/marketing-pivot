@@ -156,7 +156,7 @@ export async function generateAssetContent(context: Context, blueprint: ContentB
     const tonePrompt = blueprint.toneAndManner.join(', ');
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
+      model: 'gemini-3.1-pro-preview',
       config: { temperature: 0.85 }, // 창의적 카피 — 높은 온도
       contents: `당신은 세계 최고 수준의 전략적 퍼포먼스 마케터이자 전문 카피라이터입니다.
       다음 '전략 블루프린트(Strategic Blueprint)'를 완벽하게 준수하여, 실제 마케팅 성과를 낼 수 있는 고품질 콘텐츠를 작성하십시오.
@@ -189,7 +189,7 @@ export async function evaluateContent(context: Context, blueprint: ContentBluepr
   return withRetry(async () => {
     const ai = new GoogleGenAI({ apiKey: resolveApiKey() });
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3-flash',
       contents: `제공된 콘텐츠를 전략적 맥락(Blueprint)에 따라 엄격하게 평가하십시오. 점수는 냉정하게 매기십시오.
       
       [분석 대상]
@@ -229,7 +229,7 @@ export async function suggestImprovements(context: Context, blueprint: ContentBl
   return withRetry(async () => {
     const ai = new GoogleGenAI({ apiKey: resolveApiKey() });
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3-flash',
       contents: `콘텐츠 개선 제안을 한국어로 생성하세요. 볼드체 사용 금지.
       상황: ${context.situation}
       비평: ${evaluation.critique}`,
@@ -269,7 +269,7 @@ export async function generateVideoProductionSuite(cep: Context, blueprint: Cont
       : `Create a professional video production script.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
+      model: 'gemini-3.1-pro-preview',
       contents: `${promptContext}
       Script and Shot List must be in Korean, but 'heroPrompt' MUST be in English for Veo. No bold text.
       Situation: ${cep.situation}
@@ -350,7 +350,7 @@ export async function generateExecutionPlan(cep: Context, brandName: string): Pr
         };
 
         const response = await ai.models.generateContent({
-            model: 'gemini-3-pro-preview',
+            model: 'gemini-3.1-pro-preview',
             contents: prompt,
             config: {
                 temperature: 0.25, // 전략 수립 — 팩트 기반 구조화 전략
@@ -515,7 +515,7 @@ situation, description, conversionStage, actions도 생성하세요.`;
       }
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-preview',
+        model: 'gemini-3.1-pro-preview',
         contents: prompt,
         config,
       });
@@ -670,7 +670,7 @@ export async function fetchAndClassifyRawData(
    - setting_duration: "${discoveryDuration}"`;
 
         const response = await ai.models.generateContent({
-            model: 'gemini-3-pro-preview',
+            model: 'gemini-3.1-pro-preview',
             contents: prompt,
             config: {
                 temperature: 0.1, // SERP 데이터 분류 — 팩트 그대로
@@ -776,7 +776,7 @@ ${JSON.stringify(disappearedSummary, null, 2)}
 **볼드체 기호(**) 사용 금지.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3-flash',
       contents: prompt,
       config: {
         temperature: 0.35, // 시계열 인사이트 — 분석 + 해석 균형
@@ -813,7 +813,7 @@ export async function generateSeedKeywords(
   return withRetry(async () => {
     const ai = new GoogleGenAI({ apiKey: resolveApiKey() });
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-3-flash',
       contents: `한국 검색 시장 기준으로 "${category}" 카테고리를 검색할 때 실제로 사용하는 대표 키워드 ${count}개를 추출하세요.
 검색 의도(Informational/Exploratory/Commercial/Transactional)가 고루 포함되도록 다양하게 선택하세요.
 반드시 실제 검색어처럼 작성하세요 (예: "남성 스킨케어 추천", "남성 로션 성분 비교").
@@ -871,7 +871,7 @@ export async function generateLadderSummary(
 
   const ai = new GoogleGenAI({ apiKey: resolveApiKey() });
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-3-flash',
     contents: `당신은 디지털 마케팅 전략 컨설턴트입니다. "${category}" 카테고리의 C³ Journey Ladder 분석 결과를 비전문가도 이해할 수 있도록 해석해 주세요.
 
 [단계별 시그널 분포]
@@ -929,7 +929,7 @@ export async function generateHeatmapSummary(
 
   const ai = new GoogleGenAI({ apiKey: resolveApiKey() });
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-3-flash',
     contents: `당신은 디지털 마케팅 전략 컨설턴트입니다. "${category}" 카테고리의 Strategic Heatmap 분석 결과를 해석해 주세요.
 
 [인지 유형별 분포 (Cognition × Context)]
@@ -987,7 +987,7 @@ export async function generateNetworkSummary(
 
   const ai = new GoogleGenAI({ apiKey: resolveApiKey() });
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-3-flash',
     contents: `당신은 디지털 마케팅 전략 컨설턴트입니다. "${category}" 카테고리의 Similarity Network 분석 결과를 해석해 주세요.
 
 [클러스터 구성 (상위 6개)]

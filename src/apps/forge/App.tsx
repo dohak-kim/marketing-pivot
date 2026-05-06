@@ -577,7 +577,7 @@ ${context ? `추가 컨텍스트: ${context}` : ''}
 JSON 형식으로 반환하시오.`;
 
       const response = await getForgeAi().models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3-flash',
         contents: prompt,
         config: {
           responseMimeType: 'application/json',

@@ -570,7 +570,7 @@ ${variantGuide}
 - 전략 앵커에 명시된 핵심 메시지 방향에서 벗어나지 마세요.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
+      model: 'gemini-3.1-pro-preview',
       contents: prompt,
       config: {
         // 창의적 콘텐츠 생성 — 높은 온도로 표현 다양성 확보

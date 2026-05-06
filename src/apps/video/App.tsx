@@ -173,7 +173,7 @@ export default function VideoApp() {
 [BEST_FRAME_SEC: <seconds>]`;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3-flash',
         contents: [{ parts: [{ inlineData: { mimeType: file.type, data: base64String } }, { text: prompt }] }],
       });
 

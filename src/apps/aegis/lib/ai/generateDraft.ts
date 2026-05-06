@@ -9,7 +9,7 @@ export async function generateDraft(
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-3-flash',
     contents: prompt,
     config: {
       responseMimeType: "application/json",
