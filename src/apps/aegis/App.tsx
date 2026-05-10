@@ -311,6 +311,7 @@ const AppContent: React.FC = () => {
       case '3m': return '3m';
       case '6m': return '6m';
       case '1y': return '1y';
+      case '2y': return '2y';
       default:   return '3m';
     }
   };
@@ -339,6 +340,7 @@ const AppContent: React.FC = () => {
     duration: string,
     density: RetrievalDensity,
     preferredSource: string,
+    serpData?: SerpApiPayload,
   ): Promise<Context[]> => {
     const suggestions = await suggestContexts(
       input.category,
@@ -347,6 +349,7 @@ const AppContent: React.FC = () => {
       density,
       input.brandName,
       input.competitors,
+      serpData,
     );
     const initialized = suggestions.map(s => ({ ...s, isChecked: false }));
 
@@ -453,12 +456,25 @@ const AppContent: React.FC = () => {
         const labelA = dateRangeToLabel(config.dateRangeA, config.periodA);
         const labelB = dateRangeToLabel(config.dateRangeB, config.periodB);
 
+        // SERP 파이프라인을 한 번만 실행 후 두 기간에 공유 (현재 시점 실측 데이터)
+        let compSerpData: SerpApiPayload | undefined;
+        const compPipelineCfg = getEnvPipelineConfig();
+        if (hasRealApiConfig(compPipelineCfg)) {
+          setExportStatus('실측 SERP 데이터 수집 중...');
+          try {
+            const seedKeywords = await generateSeedKeywords(input.category, 15);
+            compSerpData = await collectSerpData(input.category, seedKeywords, compPipelineCfg);
+          } catch {
+            compSerpData = undefined;
+          }
+        }
+
         setExportStatus(`Period A (${labelA}) 분석 중...`);
-        const cepsA = await runSingleAnalysis(input, durationA, retrievalDensity, preferredSource);
+        const cepsA = await runSingleAnalysis(input, durationA, retrievalDensity, preferredSource, compSerpData);
         setContexts(cepsA);
 
         setExportStatus(`Period B (${labelB}) 분석 중...`);
-        const cepsB = await runSingleAnalysis(input, durationB, retrievalDensity, preferredSource);
+        const cepsB = await runSingleAnalysis(input, durationB, retrievalDensity, preferredSource, compSerpData);
 
         const snapshotA = { period: config.periodA, label: labelA, ceps: cepsA, timestamp: new Date().toISOString() };
         const snapshotB = { period: config.periodB, label: labelB, ceps: cepsB, timestamp: new Date().toISOString() };
