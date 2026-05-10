@@ -8,7 +8,7 @@ import { loadSnapshots, deleteSnapshot, formatSnapshotDate, ContextSnapshot } fr
 // ── Helpers ────────────────────────────────────────────────────────────────
 function calcDays(range: DateRange): number {
   const ms = new Date(range.end).getTime() - new Date(range.start).getTime();
-  return Math.max(1, Math.round(ms / 86400000));
+  return Math.max(1, Math.round(ms / 86400000) + 1); // +1: inclusive end date
 }
 
 function formatKo(iso: string): string {
