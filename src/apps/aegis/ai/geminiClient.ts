@@ -16,7 +16,7 @@ export async function callGemini(prompt: string): Promise<string> {
   const ai = new GoogleGenAI({ apiKey: resolveApiKey() });
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash",
+      model: "gemini-3-flash-preview",
       contents: prompt,
     });
     return response.text || "";

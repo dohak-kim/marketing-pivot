@@ -16,7 +16,7 @@ function resolveApiKey(): string {
 
 const ai = new GoogleGenAI({ apiKey: resolveApiKey() });
 
-const CDJ_MODEL = 'gemini-3-flash';
+const CDJ_MODEL = 'gemini-3-flash-preview';
 
 /** CDJ용 시드 키워드 생성 — aegis의 gemini.ts와 독립적으로 동일 모델 사용 */
 export async function generateCdjSeeds(topic: string, count = 12): Promise<string[]> {

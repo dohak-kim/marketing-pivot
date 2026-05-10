@@ -59,7 +59,7 @@ JSON 형식으로 응답하십시오.
   try {
     const ai = getAi();
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -126,7 +126,7 @@ export const analyzeTrends = async (snippets: string, related: string, dataVolum
   try {
     const ai = getAi();
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt + `\n\nINPUT DATA:\nSnippets: ${snippets}\nRelated: ${related}`,
       config: {
         responseMimeType: "application/json",
@@ -177,7 +177,7 @@ JSON으로만 응답하십시오.`;
   try {
     const ai = getAi();
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
+        model: 'gemini-3-pro-preview',
         contents: prompt + `\n\nINPUT DATA:\n${JSON.stringify(ceps)}`,
         config: {
           responseMimeType: "application/json",
@@ -258,7 +258,7 @@ export const generateAeoContent = async (cluster: Cluster, format: 'blog' | 'lin
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-pro-preview',
+            model: 'gemini-3-pro-preview',
             contents: basePrompt + `\n\nTarget: ${cluster.name}\nTrigger: ${cluster.cep_trigger}`,
             config: {
                 responseMimeType: "application/json",
@@ -364,7 +364,7 @@ export const getAeoScore = async (content: AeoContent, keyword: string): Promise
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-pro-preview',
+            model: 'gemini-3-pro-preview',
             contents: prompt + `\n\n키워드: ${keyword}\n콘텐츠: ${JSON.stringify(content)}`,
             config: {
                 responseMimeType: "application/json",
@@ -401,7 +401,7 @@ export const improveAeoContentBasedOnDiagnosis = async (content: AeoContent, dia
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-pro-preview',
+            model: 'gemini-3-pro-preview',
             contents: prompt + `\n\n원본: ${JSON.stringify(content)}`,
             config: {
                 responseMimeType: "application/json",
@@ -418,7 +418,7 @@ export const rewriteAeoContent = async (content: AeoContent, targetCluster: Clus
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-pro-preview', 
+            model: 'gemini-3-pro-preview', 
             contents: `한국어로 재구성하십시오. 각 섹션의 내용을 더욱 상세하게 보강하여 전체 분량을 늘려주세요. : ${JSON.stringify(content)}`,
             config: { responseMimeType: "application/json", responseSchema: content.format === 'blog' ? blogSchema : linkedinSchema }
         });
@@ -431,7 +431,7 @@ export const rewriteAeoContent = async (content: AeoContent, targetCluster: Clus
 export const generateComparisonReport = async (s_a: string, p_a: string, s_b: string, p_b: string): Promise<string> => {
     const ai = getAi();
     const response = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
+        model: 'gemini-3-pro-preview',
         contents: `기간 A(${p_a})와 기간 B(${p_b})의 검색 데이터를 대조 분석하여 한국어로 보고서를 작성하십시오.`,
     });
     return response.text;
@@ -442,7 +442,7 @@ export const generateBatchSummary = async (results: FullAnalysisResult[]): Promi
     try {
         const ai = getAi();
         const response = await ai.models.generateContent({
-            model: 'gemini-3.1-pro-preview',
+            model: 'gemini-3-pro-preview',
             contents: prompt + `\n\nDATA:\n${JSON.stringify(results.map(r => ({ query: r.query })))}`,
             config: {
                 responseMimeType: "application/json",
