@@ -314,6 +314,21 @@ const SearchConfigPanel: React.FC = () => {
     setConfig(prev => ({ ...prev, comparisonMode: !prev.comparisonMode }));
   };
 
+  const applyYoYPreset = () => {
+    const toIso = (d: Date) => d.toISOString().slice(0, 10);
+    const today = new Date();
+    const oneYearAgo = new Date(today); oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    const twoYearsAgo = new Date(today); twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+    setConfig(prev => ({
+      ...prev,
+      comparisonMode: true,
+      periodA: '1y',
+      periodB: '1y',
+      dateRangeA: { start: toIso(twoYearsAgo), end: toIso(oneYearAgo) },
+      dateRangeB: { start: toIso(oneYearAgo),  end: toIso(today) },
+    }));
+  };
+
   const updateDepth = (type: 'google' | 'naver', value: number) => {
     setConfig(prev => {
       const newDepth = { ...prev.depth, [type]: value };
@@ -448,6 +463,22 @@ const SearchConfigPanel: React.FC = () => {
                     각 기간의 시작일·종료일을 직접 지정하거나 프리셋을 선택하세요.
                     두 기간을 순차 분석 후 Sankey 다이어그램으로 변화를 시각화합니다.
                   </p>
+                </div>
+
+                {/* Quick Presets */}
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest shrink-0">빠른 설정</span>
+                  <button
+                    type="button"
+                    onClick={applyYoYPreset}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-violet-200 dark:border-violet-500/30 bg-violet-50 dark:bg-violet-900/20 text-[9px] font-black text-violet-700 dark:text-violet-300 uppercase tracking-widest hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-colors"
+                    title="최근 2년을 1년씩 나눠 연간 시즈널리티를 비교합니다"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    YoY 연간 비교
+                  </button>
                 </div>
 
                 {/* Snapshot Loader for Period A */}

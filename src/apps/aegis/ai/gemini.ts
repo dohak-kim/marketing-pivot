@@ -404,9 +404,13 @@ export async function suggestContexts(
       const targetCount = Math.min(15, Math.max(3, (density.google + density.naver) * 1.2));
 
       const isDateRange = duration.includes('~');
+      const PERIOD_LABEL: Record<string, string> = {
+        '7d': '1주', '1w': '1주', '30d': '1개월', '1m': '1개월',
+        '3m': '3개월', '6m': '6개월', '1y': '1년', '2y': '2년',
+      };
       const periodDescription = isDateRange
         ? `분석 기간: ${duration} (해당 기간의 시장 신호를 반영하세요)`
-        : `분석 기간: 최근 ${duration === '7d' ? '1주' : duration === '30d' ? '1개월' : duration} 데이터 기준`;
+        : `분석 기간: 최근 ${PERIOD_LABEL[duration] ?? duration} 데이터 기준`;
 
       // ── RAG Mode: real API data provided ────────────────────────────────────
       const useRagMode = !!serpData && serpData.keywords.length > 0;

@@ -4,7 +4,8 @@ export type AnalysisPeriod =
   | '1m'
   | '3m'
   | '6m'
-  | '1y';
+  | '1y'
+  | '2y';
 
 export const ANALYSIS_PERIOD_OPTIONS: {
   value: AnalysisPeriod;
@@ -35,5 +36,10 @@ export const ANALYSIS_PERIOD_OPTIONS: {
     value: '1y',
     label: '최근 1년',
     comment: '계절성 및 장기 Context 구조를 파악할 수 있습니다.',
+  },
+  {
+    value: '2y',
+    label: '최근 2년',
+    comment: '연간 시즈널리티 변화 및 다년도 트렌드를 분석합니다.',
   },
 ];

@@ -4,4 +4,5 @@ export type AnalysisPeriod =
   | '1m'
   | '3m'
   | '6m'
-  | '1y';
+  | '1y'
+  | '2y';
