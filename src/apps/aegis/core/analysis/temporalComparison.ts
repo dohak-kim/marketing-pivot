@@ -85,12 +85,10 @@ function getCepKeywords(cep: Context): string[] {
   return kws.map((k: any) => (typeof k === 'string' ? k : k?.keyword || '')).filter(Boolean);
 }
 
-function getDominantCognitionKey(cep: Context): string {
-  const vec = cep.journey?.cognitionVector as Record<string, number> | undefined;
-  if (!vec) return cep.cognition || '';
-  const entries = Object.entries(vec);
-  if (entries.length === 0) return cep.cognition || '';
-  return entries.reduce((a, b) => a[1] > b[1] ? a : b)[0];
+// Returns the same cognition key used by the display layer (hybridCognition → cognition → vector)
+// so that cognitionShift never contradicts what the table actually shows.
+function getDisplayCognitionKey(cep: Context): string {
+  return (cep as any).hybridCognition || cep.cognition || '';
 }
 
 // ── Multi-signal CEP pair scorer ──────────────────────────────────────────
@@ -139,8 +137,8 @@ function scoreCEPPair(
   // ── 3. Cognition alignment bonus ──────────────────────────────────────────
   // Same dominant intent = high probability of representing the same market context.
   // Applied even when text differs (AI paraphrasing shouldn't mask same-intent match).
-  const cogA = getDominantCognitionKey(cepA);
-  const cogB = getDominantCognitionKey(cepB);
+  const cogA = getDisplayCognitionKey(cepA);
+  const cogB = getDisplayCognitionKey(cepB);
   const cognitionBonus = cogA && cogB && cogA === cogB ? 0.12 : 0;
 
   // ── 4. CDJ stage alignment bonus ──────────────────────────────────────────
@@ -224,7 +222,7 @@ export function matchCEPs(cepsA: Context[], cepsB: Context[]): {
       scoreChangePct > 12 ? 'growing' :
       scoreChangePct < -12 ? 'declining' : 'stable';
 
-    const cognitionShift = getDominantCognitionKey(cepA) !== getDominantCognitionKey(cepB);
+    const cognitionShift = getDisplayCognitionKey(cepA) !== getDisplayCognitionKey(cepB);
 
     matched.push({
       cepA, cepB,
