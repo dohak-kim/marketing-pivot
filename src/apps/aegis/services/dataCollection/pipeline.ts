@@ -25,34 +25,18 @@ import type {
 } from './types';
 
 /**
- * Vite/browser-compatible env reader.
- * Vite exposes env vars via import.meta.env.VITE_* or process.env.* (both work).
+ * Vite 프로덕션 빌드 호환 env 설정.
+ * 동적 접근자(env[key])는 Vite define 치환 대상에서 제외되므로
+ * 반드시 정적 점 표기법(process.env.VITE_FOO)으로 직접 참조해야 한다.
  */
-function env(key: string): string | undefined {
-  // Vite prefix
-  const viteKey = `VITE_${key}`;
-  try {
-    // @ts-ignore — import.meta.env is Vite-specific
-    if (typeof import.meta !== 'undefined' && (import.meta as any).env?.[viteKey]) {
-      return (import.meta as any).env[viteKey];
-    }
-  } catch {}
-  // process.env fallback (Node.js / bundler define)
-  try {
-    return (process.env as any)[viteKey] || (process.env as any)[key];
-  } catch {}
-  return undefined;
-}
-
-/** Auto-detect config from environment variables */
 export function getEnvPipelineConfig(): PipelineConfig {
   return {
-    serperApiKey:      env('SERPER_API_KEY'),
-    naverClientId:     env('NAVER_CLIENT_ID'),
-    naverClientSecret: env('NAVER_CLIENT_SECRET'),
-    naverAdApiKey:     env('NAVER_AD_API_KEY'),
-    naverAdSecret:     env('NAVER_AD_SECRET'),
-    naverAdCustomerId: env('NAVER_AD_CUSTOMER_ID'),
+    serperApiKey:      process.env.VITE_SERPER_API_KEY      || process.env.SERPER_API_KEY,
+    naverClientId:     process.env.VITE_NAVER_CLIENT_ID     || process.env.NAVER_CLIENT_ID,
+    naverClientSecret: process.env.VITE_NAVER_CLIENT_SECRET || process.env.NAVER_CLIENT_SECRET,
+    naverAdApiKey:     process.env.VITE_NAVER_AD_API_KEY    || process.env.NAVER_AD_API_KEY,
+    naverAdSecret:     process.env.VITE_NAVER_AD_SECRET     || process.env.NAVER_AD_SECRET,
+    naverAdCustomerId: process.env.VITE_NAVER_AD_CUSTOMER_ID|| process.env.NAVER_AD_CUSTOMER_ID,
   };
 }
 
