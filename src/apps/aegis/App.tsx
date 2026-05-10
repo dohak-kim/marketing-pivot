@@ -473,6 +473,10 @@ const AppContent: React.FC = () => {
         const cepsA = await runSingleAnalysis(input, durationA, retrievalDensity, preferredSource, compSerpData);
         setContexts(cepsA);
 
+        // 연속 호출 과부하 방지: Period A 완료 후 3초 쿨다운
+        setExportStatus('API 안정화 대기 중...');
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
         setExportStatus(`Period B (${labelB}) 분석 중...`);
         const cepsB = await runSingleAnalysis(input, durationB, retrievalDensity, preferredSource, compSerpData);
 

@@ -120,7 +120,7 @@ function extractGroundingSources(candidates: any): GroundingSource[] {
  * Executes a function with exponential backoff retry logic.
  * Handles 500 (Internal Error), 503 (Service Unavailable), and 429 (Too Many Requests).
  */
-async function withRetry<T>(fn: () => Promise<T>, retries = 3, baseDelay = 2000): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, retries = 5, baseDelay = 3000): Promise<T> {
   for (let i = 0; i < retries; i++) {
     try {
       return await fn();
