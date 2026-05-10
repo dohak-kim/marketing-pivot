@@ -56,7 +56,7 @@ export function dedupeNews(news: NewsItem[]): NewsItem[] {
 // 네이버 뉴스 검색 API 호출 (server.ts의 /api/news 프록시 경유)
 export async function collectKoreanNews(keyword: string): Promise<NewsItem[]> {
   try {
-    const response = await axios.get(`/api/news?q=${encodeURIComponent(keyword)}`);
+    const response = await axios.get(`/api/news?query=${encodeURIComponent(keyword)}`);
     return response.data || [];
   } catch (error) {
     console.error("[newsCollector] News fetch error:", error);

@@ -24,6 +24,24 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/naver-ad/, ''),
         },
+        '/api/news': {
+          target: 'https://openapi.naver.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/news/, '/v1/search/news.json'),
+          headers: {
+            'X-Naver-Client-Id':     env.NAVER_CLIENT_ID     || '',
+            'X-Naver-Client-Secret': env.NAVER_CLIENT_SECRET  || '',
+          },
+        },
+        '/api/datalab': {
+          target: 'https://openapi.naver.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/datalab/, '/v1/datalab'),
+          headers: {
+            'X-Naver-Client-Id':     env.NAVER_CLIENT_ID     || '',
+            'X-Naver-Client-Secret': env.NAVER_CLIENT_SECRET  || '',
+          },
+        },
       },
     },
     plugins: [react()],

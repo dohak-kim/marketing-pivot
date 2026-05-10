@@ -365,14 +365,14 @@ export async function generateExecutionPlan(cep: Context, brandName: string): Pr
                         earnedMedia:  { type: Type.ARRAY, items: { type: Type.STRING } },
                         paidMedia:    { type: Type.ARRAY, items: { type: Type.STRING } },
                         kpiFramework: { type: Type.ARRAY, items: { type: Type.STRING } },
-                    },
-                    veoPrompts: {
-                        type: Type.OBJECT,
-                        properties: {
-                            reels15s:  { type: Type.STRING },
-                            shorts30s: { type: Type.STRING },
+                        veoPrompts: {
+                            type: Type.OBJECT,
+                            properties: {
+                                reels15s:  { type: Type.STRING },
+                                shorts30s: { type: Type.STRING },
+                            },
+                            required: ["reels15s", "shorts30s"],
                         },
-                        required: ["reels15s", "shorts30s"],
                     },
                     required: ["situationSummary", "executionPriority", "resourceIntensity", "ownedMedia", "earnedMedia", "paidMedia", "kpiFramework", "veoPrompts"]
                 }
