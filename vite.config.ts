@@ -46,8 +46,24 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [react()],
     define: {
-      'process.env.API_KEY':        JSON.stringify((env.GEMINI_API_KEY || env.VITE_API_KEY || env.API_KEY || '').trim()),
-      'process.env.GEMINI_API_KEY': JSON.stringify((env.GEMINI_API_KEY || env.VITE_API_KEY || env.API_KEY || '').trim()),
+      // Gemini
+      'process.env.API_KEY':               JSON.stringify((env.GEMINI_API_KEY || env.VITE_API_KEY || env.API_KEY || '').trim()),
+      'process.env.GEMINI_API_KEY':        JSON.stringify((env.GEMINI_API_KEY || env.VITE_API_KEY || env.API_KEY || '').trim()),
+      // Serper (Google SERP)
+      'process.env.VITE_SERPER_API_KEY':   JSON.stringify((env.VITE_SERPER_API_KEY || env.SERPER_API_KEY || '').trim()),
+      'process.env.SERPER_API_KEY':        JSON.stringify((env.VITE_SERPER_API_KEY || env.SERPER_API_KEY || '').trim()),
+      // Naver Search
+      'process.env.VITE_NAVER_CLIENT_ID':     JSON.stringify((env.VITE_NAVER_CLIENT_ID || env.NAVER_CLIENT_ID || '').trim()),
+      'process.env.NAVER_CLIENT_ID':          JSON.stringify((env.VITE_NAVER_CLIENT_ID || env.NAVER_CLIENT_ID || '').trim()),
+      'process.env.VITE_NAVER_CLIENT_SECRET': JSON.stringify((env.VITE_NAVER_CLIENT_SECRET || env.NAVER_CLIENT_SECRET || '').trim()),
+      'process.env.NAVER_CLIENT_SECRET':      JSON.stringify((env.VITE_NAVER_CLIENT_SECRET || env.NAVER_CLIENT_SECRET || '').trim()),
+      // Naver Search Ads
+      'process.env.VITE_NAVER_AD_API_KEY':    JSON.stringify((env.VITE_NAVER_AD_API_KEY || env.NAVER_AD_API_KEY || '').trim()),
+      'process.env.NAVER_AD_API_KEY':         JSON.stringify((env.VITE_NAVER_AD_API_KEY || env.NAVER_AD_API_KEY || '').trim()),
+      'process.env.VITE_NAVER_AD_SECRET':     JSON.stringify((env.VITE_NAVER_AD_SECRET || env.NAVER_AD_SECRET || '').trim()),
+      'process.env.NAVER_AD_SECRET':          JSON.stringify((env.VITE_NAVER_AD_SECRET || env.NAVER_AD_SECRET || '').trim()),
+      'process.env.VITE_NAVER_AD_CUSTOMER_ID':JSON.stringify((env.VITE_NAVER_AD_CUSTOMER_ID || env.NAVER_AD_CUSTOMER_ID || '').trim()),
+      'process.env.NAVER_AD_CUSTOMER_ID':     JSON.stringify((env.VITE_NAVER_AD_CUSTOMER_ID || env.NAVER_AD_CUSTOMER_ID || '').trim()),
     },
     resolve: {
       alias: { '@': path.resolve(__dirname, './src') },
