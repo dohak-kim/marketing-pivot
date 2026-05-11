@@ -355,7 +355,12 @@ const AppContent: React.FC = () => {
 
     if (!input.brandName) return initialized;
 
-    const rawData = await fetchAndClassifyRawData(input.category, density, duration);
+    let rawData: Awaited<ReturnType<typeof fetchAndClassifyRawData>> = [];
+    try {
+      rawData = await fetchAndClassifyRawData(input.category, density, duration);
+    } catch {
+      return initialized; // SERP 분류 실패 시 기본 CEP 결과로 진행
+    }
     if (rawData.length === 0) return initialized;
 
     const serpRows: SerpRawRow[] = rawData.map(r => ({
@@ -473,9 +478,8 @@ const AppContent: React.FC = () => {
         const cepsA = await runSingleAnalysis(input, durationA, retrievalDensity, preferredSource, compSerpData);
         setContexts(cepsA);
 
-        // 연속 호출 과부하 방지: Period A 완료 후 3초 쿨다운
-        setExportStatus('API 안정화 대기 중...');
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        // 연속 호출 과부하 방지: Period A 완료 후 1초 쿨다운
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         setExportStatus(`Period B (${labelB}) 분석 중...`);
         const cepsB = await runSingleAnalysis(input, durationB, retrievalDensity, preferredSource, compSerpData);
