@@ -674,7 +674,7 @@ export async function fetchAndClassifyRawData(
    - setting_duration: "${discoveryDuration}"`;
 
         const response = await ai.models.generateContent({
-            model: 'gemini-3-pro-preview',
+            model: 'gemini-3-flash-preview', // Pro보다 503 발생률 낮고 분류 작업에 충분
             contents: prompt,
             config: {
                 temperature: 0.1, // SERP 데이터 분류 — 팩트 그대로
