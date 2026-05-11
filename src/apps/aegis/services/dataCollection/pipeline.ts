@@ -25,18 +25,20 @@ import type {
 } from './types';
 
 /**
- * Vite 프로덕션 빌드 호환 env 설정.
- * 동적 접근자(env[key])는 Vite define 치환 대상에서 제외되므로
- * 반드시 정적 점 표기법(process.env.VITE_FOO)으로 직접 참조해야 한다.
+ * Vite 빌드 시 import.meta.env.VITE_* 를 실제 키값으로 정적 치환.
+ * process.env 동적 접근은 브라우저에서 실패하므로 사용하지 않는다.
  */
 export function getEnvPipelineConfig(): PipelineConfig {
+  /* eslint-disable @typescript-eslint/ban-ts-comment */
+  // @ts-ignore
+  const e = import.meta.env as Record<string, string | undefined>;
   return {
-    serperApiKey:      process.env.VITE_SERPER_API_KEY      || process.env.SERPER_API_KEY,
-    naverClientId:     process.env.VITE_NAVER_CLIENT_ID     || process.env.NAVER_CLIENT_ID,
-    naverClientSecret: process.env.VITE_NAVER_CLIENT_SECRET || process.env.NAVER_CLIENT_SECRET,
-    naverAdApiKey:     process.env.VITE_NAVER_AD_API_KEY    || process.env.NAVER_AD_API_KEY,
-    naverAdSecret:     process.env.VITE_NAVER_AD_SECRET     || process.env.NAVER_AD_SECRET,
-    naverAdCustomerId: process.env.VITE_NAVER_AD_CUSTOMER_ID|| process.env.NAVER_AD_CUSTOMER_ID,
+    serperApiKey:      e.VITE_SERPER_API_KEY,
+    naverClientId:     e.VITE_NAVER_CLIENT_ID,
+    naverClientSecret: e.VITE_NAVER_CLIENT_SECRET,
+    naverAdApiKey:     e.VITE_NAVER_AD_API_KEY,
+    naverAdSecret:     e.VITE_NAVER_AD_SECRET,
+    naverAdCustomerId: e.VITE_NAVER_AD_CUSTOMER_ID,
   };
 }
 

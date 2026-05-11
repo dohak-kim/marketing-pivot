@@ -11,7 +11,8 @@ export default async function handler(req: any, res: any) {
   queryString.delete('path');
   const qs = queryString.toString();
 
-  const targetUrl = `https://openapi.naver.com/v1/${subPath}${qs ? `?${qs}` : ''}`;
+  // subPath already contains the full path (e.g. 'v1/search/blog') — do not prepend /v1/ again
+  const targetUrl = `https://openapi.naver.com/${subPath}${qs ? `?${qs}` : ''}`;
 
   const response = await fetch(targetUrl, {
     method: req.method,
