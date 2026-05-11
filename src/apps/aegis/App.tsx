@@ -467,7 +467,7 @@ const AppContent: React.FC = () => {
         if (hasRealApiConfig(compPipelineCfg)) {
           setExportStatus('실측 SERP 데이터 수집 중...');
           try {
-            const seedKeywords = await generateSeedKeywords(input.category, 15);
+            const seedKeywords = await generateSeedKeywords(input.category, 10);
             compSerpData = await collectSerpData(input.category, seedKeywords, compPipelineCfg);
           } catch {
             compSerpData = undefined;
@@ -520,7 +520,7 @@ const AppContent: React.FC = () => {
       if (hasRealApiConfig(pipelineCfg)) {
         setExportStatus('실측 SERP 데이터 수집 중 — 시드 키워드 생성...');
         try {
-          const seedKeywords = await generateSeedKeywords(input.category, 15);
+          const seedKeywords = await generateSeedKeywords(input.category, 10);
           setExportStatus(`실측 데이터 수집 중 (${seedKeywords.length}개 키워드)...`);
           serpData = await collectSerpData(
             input.category,

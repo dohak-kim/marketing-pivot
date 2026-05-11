@@ -115,22 +115,25 @@ export async function collectSerpData(
     }
   }
 
-  // ── 3. Naver Blog/News Content (top 10 per keyword) ─────────────────────
+  // ── 3. Naver Blog/News Content — 전체 병렬 실행 ──────────────────────────
   const naverContent: Map<string, string[]> = new Map();
   if (hasNaverSearch) {
-    for (let i = 0; i < seedKeywords.length; i++) {
-      const kw = seedKeywords[i];
-      onProgress?.('Naver 콘텐츠 수집 중', i, seedKeywords.length);
-      try {
-        const blogResult = await fetchNaverSearch(kw, 'blog', {
+    onProgress?.('Naver 콘텐츠 수집 중', 0, seedKeywords.length);
+    const naverResults = await Promise.all(
+      seedKeywords.map(kw =>
+        fetchNaverSearch(kw, 'blog', {
           clientId: config.naverClientId!,
           clientSecret: config.naverClientSecret!,
-        }, 10);
-        naverContent.set(kw, blogResult.items.map(item => `${item.title} ${item.description}`));
-      } catch {
-        naverContent.set(kw, []);
-      }
-    }
+        }, 10).catch(() => null)
+      )
+    );
+    naverResults.forEach((result, i) => {
+      naverContent.set(
+        seedKeywords[i],
+        result ? result.items.map(item => `${item.title} ${item.description}`) : []
+      );
+    });
+    onProgress?.('Naver 콘텐츠 수집 중', seedKeywords.length, seedKeywords.length);
   }
 
   // ── 4. Normalize into EnrichedKeyword array ──────────────────────────────

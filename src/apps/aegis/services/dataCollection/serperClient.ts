@@ -83,20 +83,23 @@ export async function fetchGoogleSerp(
 }
 
 /**
- * Batch fetch for multiple keywords.
- * Adds 200ms inter-request delay to stay within rate limits.
+ * Batch fetch for multiple keywords — 5개씩 병렬 실행.
+ * Serper 레이트 리밋(~10 req/s) 내에서 최대 속도 확보.
  */
 export async function fetchGoogleSerpBatch(
   keywords: string[],
   config: SerperClientConfig,
   onProgress?: (done: number, total: number) => void,
 ): Promise<SerperKeywordResult[]> {
+  const CHUNK = 5;
   const results: SerperKeywordResult[] = [];
-  for (let i = 0; i < keywords.length; i++) {
-    results.push(await fetchGoogleSerp(keywords[i], config));
-    onProgress?.(i + 1, keywords.length);
-    if (i < keywords.length - 1) {
-      await new Promise(r => setTimeout(r, 200));
+  for (let i = 0; i < keywords.length; i += CHUNK) {
+    const chunk = keywords.slice(i, i + CHUNK);
+    const chunkResults = await Promise.all(chunk.map(kw => fetchGoogleSerp(kw, config)));
+    results.push(...chunkResults);
+    onProgress?.(Math.min(i + CHUNK, keywords.length), keywords.length);
+    if (i + CHUNK < keywords.length) {
+      await new Promise(r => setTimeout(r, 200)); // chunk 간 딜레이만 유지
     }
   }
   return results;
