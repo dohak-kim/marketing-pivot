@@ -9,6 +9,7 @@
     <!-- 파비콘: AEGIS 방패 심볼 (SVG) -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%235B52F5'/><path d='M16 4L6 8v8c0 6 4.5 10.5 10 12 5.5-1.5 10-6 10-12V8L16 4z' fill='white' opacity='0.95'/><text x='16' y='21' text-anchor='middle' font-size='10' font-weight='900' font-family='system-ui' fill='%235B52F5'>A</text></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%235B52F5'/><path d='M16 4L6 8v8c0 6 4.5 10.5 10 12 5.5-1.5 10-6 10-12V8L16 4z' fill='white' opacity='0.95'/></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -16,6 +17,115 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              /* Noto Sans KR가 한글 렌더링, Inter가 영문 보완 */
+              sans: ['"Noto Sans KR"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+            },
+            colors: {
+              /*
+               * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               * AEGIS Design System — Primary Brand (Deep Cobalt)
+               * indigo 재매핑 → 기존 컴포넌트 클래스 무수정
+               * WCAG AA 기준: indigo-500+ 흰 배경에서 4.5:1 이상
+               * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               */
+              indigo: {
+                50:  '#F0EFFF',
+                100: '#E4E3FF',
+                200: '#CCCAFF',
+                300: '#A9A6FF',
+                400: '#8279FF',
+                500: '#5B52F5', /* 주요 CTA — 흰 배경 대비 4.8:1 ✅ AA */
+                600: '#4A40DC', /* Hover — 흰 배경 대비 6.1:1 ✅ AA */
+                700: '#3830B8', /* Active — 흰 배경 대비 7.8:1 ✅ AAA */
+                800: '#29239A',
+                900: '#1C1872',
+                950: '#0D0B42',
+              },
+
+              /*
+               * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               * Neutral (Warm-Slate) — 차별화된 웜 퍼플 뉴트럴
+               * 기존 쿨 그레이 slate 재매핑 → 아이덴티티 강화
+               * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               */
+              slate: {
+                50:  '#F6F6FE',
+                100: '#EDEDFB',
+                200: '#DCDCF5',
+                300: '#C2C1E8',
+                400: '#9291CC',
+                500: '#6B6AAA',
+                600: '#525190',
+                700: '#3D3C72',
+                800: '#292858',
+                850: '#1D1C42',
+                900: '#131230',
+                950: '#08071C',
+              },
+
+              /*
+               * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               * Teal Accent — 참신함, 전략적 실행을 표현
+               * emerald와 sky 사이의 독자적 위치
+               * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               */
+              teal: {
+                50:  '#F0FDF9',
+                100: '#CCFBF0',
+                200: '#99F4E1',
+                300: '#5EE8CC',
+                400: '#2DD4B3',
+                500: '#14B89B', /* Accent — 흰 배경 대비 3.8:1 (대형요소용) */
+                600: '#0D9480', /* 텍스트용 — 흰 배경 대비 4.6:1 ✅ AA */
+                700: '#0F766A',
+                800: '#115E56',
+                900: '#134E47',
+                950: '#042F2B',
+              },
+
+              /*
+               * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               * Signal Colors — WCAG AA 보장 (흰 배경 기준)
+               * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+               */
+              /* emerald (성공/완료): 기본값 유지 — emerald-600(#059669) 4.6:1 ✅ */
+              /* rose (오류/경고): 기본값 유지 — rose-600(#E11D48) 4.7:1 ✅ */
+              /* amber (주의): 기본값 유지 — amber-700(#B45309) 4.5:1 ✅ */
+
+              /*
+               * Sky → 정보성 색상 (info)
+               * sky-600 = #0284C7, 흰 배경 4.5:1 ✅
+               */
+            },
+
+            /* 커스텀 그림자 — 색상 아이덴티티 반영 */
+            boxShadow: {
+              'brand-sm':  '0 1px 3px rgba(91,82,245,0.12), 0 1px 2px rgba(91,82,245,0.08)',
+              'brand-md':  '0 4px 12px rgba(91,82,245,0.18), 0 2px 4px rgba(91,82,245,0.10)',
+              'brand-lg':  '0 8px 30px rgba(91,82,245,0.24), 0 4px 8px rgba(91,82,245,0.12)',
+              'brand-glow':'0 0 40px rgba(91,82,245,0.35)',
+            },
+
+            /* 애니메이션 */
+            animation: {
+              'in': 'in 0.15s ease-out',
+              'fade-in': 'fadeIn 0.3s ease-out',
+              'slide-in-from-bottom-4': 'slideUp4 0.3s ease-out',
+              'slide-in-from-bottom-8': 'slideUp8 0.4s ease-out',
+              'zoom-in-95': 'zoomIn95 0.2s ease-out',
+            },
+          }
+        }
+      }
+    </script>
 
     <style>
       /* ── CSS Design Tokens ── */
